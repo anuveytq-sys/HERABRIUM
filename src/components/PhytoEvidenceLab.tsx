@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowDownToLine, ArrowUpRight, BookmarkPlus, BookOpen, Check, ClipboardList, FileText, LoaderCircle, Search, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
+import { ArrowDownToLine, ArrowUpRight, BookmarkPlus, BookOpen, ClipboardList, FileText, LoaderCircle, Search, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
 
 type Work = { id:string; title:string; year?:number; authors:string[]; venue:string; doi?:string; url?:string; open_access:boolean; study_type:string; abstract:string; metadata_type:string; source:string; source_url?:string; limitations:string };
 type Result = { query:string; total_matched:number; returned:number; works:Work[]; coverage:{with_abstract:number;open_access:number;with_year:number;year_span:number[]|null;classified_types:string[]}; warnings:string[]; review_required:boolean };
