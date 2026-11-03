@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "https://herbarium-api.vercel.app";
+const API_BASE = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "";
 
 export type ExtractionResult = {
   document_name: string;
@@ -10,7 +10,6 @@ export type ExtractionResult = {
 };
 
 export async function extractDocument(file: File): Promise<ExtractionResult> {
-  if (!API_BASE) throw new Error("The research API is not configured. Set VITE_API_BASE_URL to enable server-side document extraction.");
   const form = new FormData();
   form.append("file", file);
   const response = await fetch(API_BASE + "/api/v1/extract", { method: "POST", body: form });
@@ -22,7 +21,6 @@ export async function extractDocument(file: File): Promise<ExtractionResult> {
 }
 
 export async function checkApi(): Promise<boolean> {
-  if (!API_BASE) return false;
   try {
     const response = await fetch(API_BASE + "/health", { signal: AbortSignal.timeout(2500) });
     return response.ok;
