@@ -133,3 +133,7 @@ async def extract_document(file: UploadFile = File(...)) -> dict[str, Any]:
 from .ethnoknowledge import router as ethnoknowledge_router
 
 app.include_router(ethnoknowledge_router)
+
+from .research_bridge import router as research_bridge_router
+
+app.include_router(research_bridge_router)
