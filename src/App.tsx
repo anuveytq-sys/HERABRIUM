@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUpRight, Atom, BookOpen, CheckCircle2, ChevronRight, CircleHelp, Database, Dna, ExternalLink, FileSearch, Globe2, Leaf, Menu, Network, Search, ShieldCheck, Sparkles, X } from "lucide-react";
+import { ArrowDown, ArrowUpRight, BookOpen, CheckCircle2, ChevronRight, CircleHelp, Database, ExternalLink, FileSearch, Globe2, Leaf, Menu, Network, Search, ShieldCheck, Sparkles, X } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Globe from "./components/Globe";
@@ -56,7 +56,7 @@ export default function App() {
     <header className="topbar">
       <a className="brand" href="#home" aria-label="HERBARIUM home"><span className="brand-mark"><Leaf size={19}/></span><span>HERBARIUM<small>INTELLIGENCE NETWORK</small></span></a>
       <nav className={menuOpen ? "nav-links open" : "nav-links"}>
-        <button onClick={() => navigate("intelligence")}>Intelligence</button><button onClick={() => navigate("ethno")}>EthnoKnowledge AI</button><button onClick={() => navigate("phytochem")}>Biodiversity Explorer</button><button onClick={() => navigate("graph")}>Knowledge graph</button><button onClick={() => navigate("research")}>Research gaps</button><button onClick={() => navigate("laboratory")}>Document lab</button>
+        <button onClick={() => navigate("intelligence")}>Intelligence</button><button onClick={() => navigate("ethno")}>EthnoKnowledge AI</button><button onClick={() => navigate("phytochem")}>Biodiversity Explorer</button><button onClick={() => navigate("graph")}>Knowledge graph</button><button onClick={() => navigate("research")}>Data gaps</button><button onClick={() => navigate("laboratory")}>Document lab</button>
       </nav>
       <div className="topbar-right"><span className="system-status"><i/> SYSTEM {apiOnline ? "CONNECTED" : "LOCAL DEMO"}</span><button className="icon-button mobile-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">{menuOpen ? <X/> : <Menu/>}</button><button className="button button-outline header-cta" onClick={() => navigate("intelligence")}>Explore network <ArrowUpRight size={15}/></button></div>
     </header>
@@ -71,7 +71,7 @@ export default function App() {
           <div className="hero-actions"><button className="button button-primary" onClick={() => navigate("intelligence")}>Enter research network <ArrowUpRight size={16}/></button><button className="text-button" onClick={() => navigate("manifesto")}>Explore the mission <ArrowDown size={15}/></button></div>
           <div className="hero-metrics">{demoStats.map((stat) => <div key={stat.label}><strong>{stat.value}</strong><span>{stat.label}</span></div>)}</div>
         </div>
-        <div className="hero-visual"><div className="hero-orbit orbit-one"/><div className="hero-orbit orbit-two"/><div className="hero-orbit orbit-three"/><div className="globe-label label-top"><span>FIELD / 001</span><b>BOTANICAL INTELLIGENCE</b></div><Globe/><div className="globe-coordinate">18° 31' N&nbsp; / &nbsp;73° 51' E<br/><span>VISUAL RESEARCH PROJECTION</span></div><div className="floating-chip chip-one"><Leaf size={13}/> SPECIES NETWORK <b>ACTIVE</b></div><div className="floating-chip chip-two"><Dna size={13}/> SPECIMEN RECORDS <b>03</b></div></div>
+        <div className="hero-visual"><div className="hero-orbit orbit-one"/><div className="hero-orbit orbit-two"/><div className="hero-orbit orbit-three"/><div className="globe-label label-top"><span>FIELD / 001</span><b>BOTANICAL INTELLIGENCE</b></div><Globe/><div className="globe-coordinate">18° 31' N&nbsp; / &nbsp;73° 51' E<br/><span>VISUAL RESEARCH PROJECTION</span></div><div className="floating-chip chip-one"><Leaf size={13}/> SPECIES NETWORK <b>ACTIVE</b></div><div className="floating-chip chip-two"><Leaf size={13}/> SPECIMEN RECORDS <b>03</b></div></div>
         <div className="hero-bottom"><span>SCROLL TO EXPLORE</span><div className="scroll-stem"><i/></div><span>01 / 06 — INTELLIGENCE CORE</span></div>
       </section>
 
@@ -99,7 +99,7 @@ export default function App() {
             <p className="profile-summary">{selectedPlant.summary}</p>
             <div className="taxonomy-line"><span>FAMILY</span><b>{selectedPlant.family}</b><span>PROFILE COMPLETENESS</span><b>{completeness}/5 fields</b></div>
             <div className="completeness-track"><span style={{ width: (completeness / 5 * 100) + "%" }}/></div>
-            <div className="profile-columns"><div><span className="eyebrow">BOTANICAL TOPICS</span>{selectedPlant.compounds.map((compound) => <span className="tag" key={compound}><Atom size={12}/>{compound}</span>)}</div><div><span className="eyebrow">RESEARCH TOPICS</span>{selectedPlant.researchTopics.map((topic) => <span className="tag" key={topic}><BookOpen size={12}/>{topic}</span>)}</div></div>
+            <div className="profile-columns"><div><span className="eyebrow">BOTANICAL TOPICS</span>{selectedPlant.tags.map((tag) => <span className="tag" key={tag}><Leaf size={12}/>{tag}</span>)}</div><div><span className="eyebrow">RESEARCH TOPICS</span>{selectedPlant.researchTopics.map((topic) => <span className="tag" key={topic}><BookOpen size={12}/>{topic}</span>)}</div></div>
             <div className="profile-sources"><div><span className="eyebrow">SOURCE REGISTER / {sourceCount.toString().padStart(2, "0")}</span><span className="tiny-note">Discovery links, not validated findings</span></div>{selectedPlant.sources.map((source) => <button key={source.id} onClick={() => setActiveSource(source)}><span><Database size={14}/>{source.publisher}</span><ArrowUpRight size={15}/></button>)}</div>
           </div>
         </div>
@@ -118,11 +118,11 @@ export default function App() {
         <div className="section-heading reveal"><div><span className="eyebrow">SOURCE-LINKED RELATIONSHIPS</span><h2>See the science<br/><em>between the lines.</em></h2></div><p>Explore a transparent relationship map for the selected species. Select a node to inspect what the connection means and what still needs verification.</p></div>
         <div className="graph-toolbar reveal"><div><Network size={16}/><span>LIVE GRAPH / {selectedPlant.commonName.toUpperCase()}</span></div><span>SELECT ANY NODE TO INSPECT</span></div>
         <div className="reveal"><KnowledgeGraph plant={selectedPlant}/></div>
-        <div className="graph-footnote"><CircleHelp size={15}/> Relationships in this starter graph are exploratory links. Validate each compound and knowledge relationship against primary sources before scientific use.</div>
+        <div className="graph-footnote"><CircleHelp size={15}/> Relationships in this starter graph are exploratory links. Validate each taxonomy and provenance relationship against institutional sources before scientific use.</div>
       </section>
 
       <section className="research-section section-pad" id="research">
-        <div className="section-index reveal"><span>04</span><i/> RESEARCH GAP INTELLIGENCE</div>
+        <div className="section-index reveal"><span>04</span><i/> BOTANICAL DATA QUALITY</div>
         <div className="section-heading reveal"><div><span className="eyebrow">NOT JUST WHAT WE KNOW</span><h2>Make the missing<br/><em>visible.</em></h2></div><p>Gap cards are generated from the completeness and provenance state of the current starter dataset. They are actionable data-quality findings, not claims about the global state of science.</p></div>
         <div className="gap-grid">{researchGaps.map((gap, index) => <article className="gap-card reveal" key={gap.title}><div className="gap-top"><span>GAP / 0{index + 1}</span><span className="gap-severity">{gap.severity}</span></div><div className="gap-icon">{[<Globe2/>, <BookOpen/>, <FileSearch/>, <Atom/>][index]}</div><h3>{gap.title}</h3><p>{gap.detail}</p><div className="gap-track">{gap.track}<ArrowUpRight size={14}/></div></article>)}</div>
       </section>
