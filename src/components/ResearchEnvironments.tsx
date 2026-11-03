@@ -75,7 +75,8 @@ async function queryData(e:Env,q:string):Promise<{items:RecordItem[];summary:str
  if(e.mode==="gbif"){
   const a=await fetch("https://api.gbif.org/v1/species/match?name="+encodeURIComponent(q));if(!a.ok)throw new Error("GBIF taxonomic service unavailable.");
   const t=await a.json();if(!t.scientificName)throw new Error("No GBIF taxonomic match. Try the accepted scientific name.");
-  const filters:Record<string,string>={risk:"&hasCoordinate=true",climate:"&hasCoordinate=true&hasGeospatialIssue=false",botanical:"&basisOfRecord=PRESERVED_SPECIMEN",econetwork:"&hasCoordinate=true",conservation:"&hasCoordinate=true",sustainability:"&hasCoordinate=true",quality:"&hasCoordinate=true"};\n  const b=await fetch("https://api.gbif.org/v1/occurrence/search?scientificName="+encodeURIComponent(t.scientificName)+(filters[e.id]||"")+"&limit=8");if(!b.ok)throw new Error("GBIF occurrence service unavailable.");
+  const filters:Record<string,string>={risk:"&hasCoordinate=true",climate:"&hasCoordinate=true&hasGeospatialIssue=false",botanical:"&basisOfRecord=PRESERVED_SPECIMEN",econetwork:"&hasCoordinate=true",conservation:"&hasCoordinate=true",sustainability:"&hasCoordinate=true",quality:"&hasCoordinate=true"};
+  const b=await fetch("https://api.gbif.org/v1/occurrence/search?scientificName="+encodeURIComponent(t.scientificName)+(filters[e.id]||"")+"&limit=8");if(!b.ok)throw new Error("GBIF occurrence service unavailable.");
   const o=await b.json();const items:RecordItem[]=(o.results||[]).map((r:any)=>({title:r.scientificName||t.scientificName,sub:[r.country,r.eventDate,r.basisOfRecord].filter(Boolean).join(" · "),detail:[r.datasetName,r.institutionCode,r.decimalLatitude!=null?"Coordinates "+r.decimalLatitude+", "+r.decimalLongitude:"Coordinates not supplied"].filter(Boolean).join(" — "),url:r.references||"https://www.gbif.org/occurrence/"+r.key,id:"GBIF occurrence "+r.key}));
   const count=o.count??items.length;
   const summaries:Record<string,string>={
