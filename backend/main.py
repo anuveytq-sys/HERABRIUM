@@ -21,12 +21,6 @@ PLANT_TERMS = {
     "Withania somnifera": ["withania somnifera", "ashwagandha"],
     "Tinospora cordifolia": ["tinospora cordifolia", "giloy"],
 }
-COMPOUND_TERMS = [
-    "curcumin", "demethoxycurcumin", "bisdemethoxycurcumin",
-    "azadirachtin", "nimbin", "nimbolide", "eugenol",
-    "ursolic acid", "rosmarinic acid", "withaferin A", "withanolide",
-]
-
 app = FastAPI(
     title="HERBARIUM Intelligence API",
     version=APP_VERSION,
@@ -76,13 +70,6 @@ def find_candidates(text: str, pages: list[tuple[int, str]]) -> list[dict[str, A
                     (f"Page {page_number}: " if page_number else "") + excerpt)
                 break
 
-    for compound in COMPOUND_TERMS:
-        match = re.search(r"(?<!\w)" + re.escape(compound) + r"(?!\w)", normalized)
-        if match:
-            page_number = next((number for number, page_text in pages if compound in page_text.casefold()), None)
-            excerpt = text[max(0, match.start() - 90): min(len(text), match.end() + 130)].replace("\n", " ")
-            add(compound.title(), "compound", 0.86,
-                (f"Page {page_number}: " if page_number else "") + excerpt)
 
     return list(found.values())
 
