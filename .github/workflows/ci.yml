@@ -7,6 +7,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Do not cancel a running validation job when another commit arrives.
+# GitHub Actions may retain only the newest pending run in a concurrency group,
+# so wait for each run to finish before pushing another main-branch commit.
+concurrency:
+  group: herbarium-main-ci
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -18,7 +25,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - run: npm install
       - run: npm run typecheck
       - run: npm run build
