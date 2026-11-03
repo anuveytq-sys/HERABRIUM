@@ -77,7 +77,20 @@ async function queryData(e:Env,q:string):Promise<{items:RecordItem[];summary:str
   const t=await a.json();if(!t.scientificName)throw new Error("No GBIF taxonomic match. Try the accepted scientific name.");
   const filters:Record<string,string>={risk:"&hasCoordinate=true",climate:"&hasCoordinate=true&hasGeospatialIssue=false",botanical:"&basisOfRecord=PRESERVED_SPECIMEN",econetwork:"&hasCoordinate=true",conservation:"&hasCoordinate=true",sustainability:"&hasCoordinate=true",quality:"&hasCoordinate=true"};\n  const b=await fetch("https://api.gbif.org/v1/occurrence/search?scientificName="+encodeURIComponent(t.scientificName)+(filters[e.id]||"")+"&limit=8");if(!b.ok)throw new Error("GBIF occurrence service unavailable.");
   const o=await b.json();const items:RecordItem[]=(o.results||[]).map((r:any)=>({title:r.scientificName||t.scientificName,sub:[r.country,r.eventDate,r.basisOfRecord].filter(Boolean).join(" · "),detail:[r.datasetName,r.institutionCode,r.decimalLatitude!=null?"Coordinates "+r.decimalLatitude+", "+r.decimalLongitude:"Coordinates not supplied"].filter(Boolean).join(" — "),url:r.references||"https://www.gbif.org/occurrence/"+r.key,id:"GBIF occurrence "+r.key}));
-  return {items,summary:"Taxon match: "+t.scientificName+" ("+(t.rank||"rank unavailable")+"). GBIF reports "+(o.count??items.length)+" matching occurrence records; showing "+items.length+". Occurrences are not abundance or conservation status.",source:"GBIF Species API + Occurrence API"};
+  const count=o.count??items.length;
+  const summaries:Record<string,string>={
+   preservation:"Preservation coverage: "+count+" GBIF occurrence records are indexed for this taxon; inspect geographic and temporal gaps before proposing digitisation priorities.",
+   biosphere:"Distribution layer: "+count+" occurrence records found; "+items.filter(x=>x.detail.includes("Coordinates ")).length+" of the displayed records include coordinates for mapping.",
+   risk:"Observation coverage audit: "+count+" coordinate-bearing records returned. This is a data-coverage signal only, not an extinction-risk assessment.",
+   climate:"Environmental-analysis readiness: "+items.filter(x=>x.sub).length+" returned records include date or locality context. Climate variables are not inferred by this panel.",
+   botanical:"Specimen provenance: "+items.filter(x=>x.sub.includes("PRESERVED_SPECIMEN")).length+" of the displayed records are preserved specimens. Institution and collection metadata should be checked record by record.",
+   econetwork:"Ecological connection scan: "+new Set(items.map(x=>x.sub.split(" · ")[0]).filter(Boolean)).size+" distinct locality labels appear in the displayed records.",
+   conservation:"Conservation evidence readiness: "+count+" coordinate-bearing observations found. No threat category is assigned without an authoritative conservation assessment.",
+   sustainability:"Scenario baseline: "+count+" coordinate-bearing occurrence records provide an observational starting point; no future sustainability outcome is predicted.",
+   identity:"Identity resolution: accepted name "+t.scientificName+", rank "+(t.rank||"not supplied")+", match confidence "+(t.confidence??"not supplied")+". Review synonyms and taxonomic status at the source.",
+   quality:"Metadata audit: "+items.filter(x=>x.sub&&x.detail).length+" of "+items.length+" displayed records contain both locality/date and dataset/institution context."
+  };
+  return {items,summary:(summaries[e.id]||("Taxon match: "+t.scientificName+" ("+(t.rank||"rank unavailable")+"). "+count+" occurrence records found."))+" Occurrence counts are not abundance or conservation status.",source:"GBIF Species API + Occurrence API"};
  }
  if(e.mode==="pubchem"){
   const r=await fetch("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+encodeURIComponent(q)+"/property/MolecularFormula,MolecularWeight,IUPACName/JSON");if(!r.ok)throw new Error("No PubChem compound record returned.");
@@ -90,7 +103,31 @@ async function queryData(e:Env,q:string):Promise<{items:RecordItem[];summary:str
  const r=await fetch("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term="+encodeURIComponent(scopedQuery)+"&retmode=json&retmax=8");if(!r.ok)throw new Error("NCBI PubMed search unavailable.");
  const d=await r.json();const ids=d.esearchresult?.idlist||[];if(!ids.length)return {items:[],summary:"No indexed records found. Try a broader phrase or scientific synonym.",source:"NCBI E-utilities / PubMed"};
  const s=await fetch("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id="+ids.join(",")+"&retmode=json");if(!s.ok)throw new Error("PubMed metadata retrieval failed.");const z=await s.json();
- return {items:ids.map((id:string)=>{const p=z.result?.[id]||{};return {title:p.title||"Untitled indexed record",sub:[p.pubdate,p.fulljournalname].filter(Boolean).join(" · "),detail:(p.authors||[]).slice(0,4).map((a:any)=>a.name).join(", ")||"Author metadata unavailable",url:"https://pubmed.ncbi.nlm.nih.gov/"+id+"/",id:"PMID "+id};}),summary:"PubMed returned "+(d.esearchresult?.count||ids.length)+" indexed result(s); showing "+ids.length+". Search relevance is not evidence strength. Review original methods, results and limitations.",source:"NCBI E-utilities / PubMed"};
+ const records=ids.map((id:string)=>{const p=z.result?.[id]||{};return {title:p.title||"Untitled indexed record",sub:[p.pubdate,p.fulljournalname].filter(Boolean).join(" · "),detail:(p.authors||[]).slice(0,4).map((a:any)=>a.name).join(", ")||"Author metadata unavailable",url:"https://pubmed.ncbi.nlm.nih.gov/"+id+"/",id:"PMID "+id};});
+ const dated=records.map(x=>({year:Number((x.sub.match(/\\b(19|20)\\d{2}\\b/)||[])[0]||0),journal:x.sub.split(" · ").slice(1).join(" · ")}));
+ const journals=new Set(dated.map(x=>x.journal).filter(Boolean));
+ const metadataComplete=records.filter(x=>x.title&&x.sub&&x.detail!=="Author metadata unavailable").length;
+ const taskSummaries:Record<string,string>={
+  ethnomemory:"Ethnobotanical archive scan: retrieved records are filtered toward ethnobotany, ethnomedicine and traditional medicine. Historical meaning still requires reading the full text.",
+  crossculture:"Cross-cultural comparison set: "+journals.size+" journal titles represented in this result sample. Compare geographic and cultural context in the original papers; do not merge traditions into one claim.",
+  manuscript:"Manuscript source discovery: "+records.length+" PubMed records found as possible source documents. This does not OCR or extract an uploaded manuscript; use Document Lab for file processing.",
+  provenance:"Citation provenance: "+records.length+" PMID source identifiers resolved. Open each source to verify authorship, DOI, publisher and original publication details.",
+  confidence:"Metadata completeness audit: "+metadataComplete+" of "+records.length+" returned records include title, date/journal and author metadata. This is record completeness, not scientific trust or efficacy.",
+  relationships:"Plant–compound literature leads: results are scoped toward phytochemicals, natural products and isolated compounds. Confirm each plant-compound link in the full text.",
+  priority:"Research prioritisation snapshot: "+(d.esearchresult?.count||ids.length)+" indexed matches reported; use this as a literature-density lead, not a quality ranking or proof that a topic is neglected.",
+  targets:"Biological target literature: results are scoped toward proteins, enzymes, receptors and molecular targets. Confirm experimental target evidence and assay context in each paper.",
+  evidence:"Evidence retrieval: records are scoped toward clinical, observational, laboratory and review terminology. Study design and evidence strength must be assessed from the full paper.",
+  matrix:"Evidence comparison: "+journals.size+" distinct journal titles appear in the displayed sample across "+new Set(dated.map(x=>x.year).filter(Boolean)).size+" publication years. Compare methods and populations manually.",
+  copilot:"Research copilot source set: "+records.length+" indexed papers retrieved for source-grounded reading. This panel retrieves literature; it does not generate treatment guidance.",
+  timeline:"Publication timeline: "+(dated.map(x=>x.year).filter(Boolean).sort((a,b)=>a-b).join(", ")||"No publication years supplied")+". Dates are taken from PubMed metadata.",
+  claim:"Claim cross-check: "+records.length+" relevant literature leads found. This search cannot establish a claim as true or false; inspect supporting and contradictory results.",
+  discovery:"Cross-domain discovery: "+records.length+" literature leads retrieved for connecting botanical, phytochemical and biodiversity research. Cross-check plant identity with taxonomy and occurrence sources.",
+  gaps:"Coverage-gap scan: "+(records.length-metadataComplete)+" displayed records lack one or more basic metadata fields. This identifies gaps in this result sample, not global research gaps.",
+  impact:"Research output snapshot: "+journals.size+" journal titles and "+new Set(dated.map(x=>x.year).filter(Boolean)).size+" publication years in the displayed sample. No citation-impact score is calculated.",
+  report:"Research brief sources: "+records.length+" PMID-linked records assembled with publication metadata. Open and review the original papers before citing or drawing conclusions."
+ };
+ const summary=taskSummaries[e.id]||("PubMed returned "+(d.esearchresult?.count||ids.length)+" indexed result(s); showing "+ids.length+". Search relevance is not evidence strength. Review original methods, results and limitations.");
+ return {items:records,summary:summary+" Search relevance is not evidence strength; inspect original methods, results and limitations.",source:"NCBI E-utilities / PubMed"};
 }
 export default function ResearchEnvironments({onClose}:{onClose:()=>void}){
  const [active,setActive]=useState<Env|null>(null),[q,setQ]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState(""),[result,setResult]=useState<{items:RecordItem[];summary:string;source:string}|null>(null);
