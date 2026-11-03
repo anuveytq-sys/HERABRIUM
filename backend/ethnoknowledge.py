@@ -34,7 +34,7 @@ REGIONS = [
  {"region":"East Asia","languages":["Chinese","Japanese","Korean"],"plants":[],"note":"Expansion-ready region. No records are asserted until sourced and reviewed."},
  {"region":"West Africa","languages":["Yoruba","Akan","Hausa"],"plants":[],"note":"Expansion-ready region. Community attribution and consent are required before ingesting knowledge."},
 ]
-APPLICATION_TOPICS = ["Food and culinary documentation","Agricultural and ecological use","Material and craft traditions","Cultural and ceremonial documentation","Historical materia medica","Phytochemical research context"]
+APPLICATION_TOPICS = ["Food and culinary documentation","Agricultural and ecological use","Material and craft traditions","Cultural and ceremonial documentation","Historical materia medica"]
 ATTRIBUTION_STATES = ["Publicly documented source","Community-authorised record","Restricted / consent required","Attribution incomplete","Unknown — review required"]
 
 def _read_upload(filename: str, data: bytes) -> tuple[str, list[dict[str, Any]]]:
