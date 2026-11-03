@@ -97,8 +97,8 @@ export default function App() {
             <div className="profile-topline"><span className="eyebrow">SPECIES DOSSIER / {selectedPlant.id.toUpperCase()}</span><span className="status-pill"><i/> DEMO PROFILE</span></div>
             <div className="profile-title"><div><h3>{selectedPlant.commonName}</h3><em>{selectedPlant.scientificName}</em></div><div className="profile-seal"><Leaf size={25}/><small>BOTANICAL<br/>RECORD</small></div></div>
             <p className="profile-summary">{selectedPlant.summary}</p>
-            <div className="taxonomy-line"><span>FAMILY</span><b>{selectedPlant.family}</b><span>PROFILE COMPLETENESS</span><b>{completeness}/5 fields</b></div>
-            <div className="completeness-track"><span style={{ width: (completeness / 5 * 100) + "%" }}/></div>
+            <div className="taxonomy-line"><span>FAMILY</span><b>{selectedPlant.family}</b><span>PROFILE COMPLETENESS</span><b>{completeness}/4 fields</b></div>
+            <div className="completeness-track"><span style={{ width: (completeness / 4 * 100) + "%" }}/></div>
             <div className="profile-columns"><div><span className="eyebrow">BOTANICAL TOPICS</span>{selectedPlant.tags.map((tag) => <span className="tag" key={tag}><Leaf size={12}/>{tag}</span>)}</div><div><span className="eyebrow">RESEARCH TOPICS</span>{selectedPlant.researchTopics.map((topic) => <span className="tag" key={topic}><BookOpen size={12}/>{topic}</span>)}</div></div>
             <div className="profile-sources"><div><span className="eyebrow">SOURCE REGISTER / {sourceCount.toString().padStart(2, "0")}</span><span className="tiny-note">Discovery links, not validated findings</span></div>{selectedPlant.sources.map((source) => <button key={source.id} onClick={() => setActiveSource(source)}><span><Database size={14}/>{source.publisher}</span><ArrowUpRight size={15}/></button>)}</div>
           </div>
