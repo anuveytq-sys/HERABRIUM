@@ -389,7 +389,6 @@ async def research_query(payload: ResearchQuery, request: Request) -> dict[str, 
         "Only the first 15 occurrence records are returned by this endpoint; use the GBIF portal for broader exploration.",
         "Wikidata and Crossref matches are discovery metadata. Verify the original source before citing or treating a statement as established.",
         "No scanned-document OCR, full-text article access, medical interpretation or clinical assessment is performed.",
-    ]
     ])
     if occurrence_data.get("warning"):
         warnings.append(occurrence_data["warning"])
