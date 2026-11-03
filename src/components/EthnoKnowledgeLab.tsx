@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { AlertTriangle, ArrowDownToLine, ChevronDown, Clock3, FileSearch, FileText, Fingerprint, Languages, Leaf, LoaderCircle, Network, Scale, ShieldCheck, Sparkles, UploadCloud } from "lucide-react";
 import { analyzeEthnoDocument, compareEthnoDocuments, type EthnoAnalysis, type EthnoComparison } from "../lib/api";
+import ResearchBridgePanel from "./ResearchBridgePanel";
 
 const regions=["Unspecified","South Asia","East Asia","West Africa","Europe","Latin America"];
 const tabs=["Overview","Plant & language","Timeline","Source audit","Compare"];
@@ -47,5 +48,6 @@ export default function EthnoKnowledgeLab(){
    </div>
   </div>
   <div className="ethno-explorer"><div className="ethno-explorer-title"><span className="eyebrow">REGION / APPLICATION / ATTRIBUTION EXPLORER</span><b>Context is part of the record.</b></div><div className="ethno-explorer-grid"><div><Languages/><b>Regional language lens</b><span>English · Hindi · Sanskrit · Bengali · Tamil · Telugu · Marathi</span><small>Starter alias coverage only; add community-reviewed vocabulary before claiming full language support.</small></div><div><Leaf/><b>Application domains</b><span>Historical materia medica · Food & culinary · Agriculture & ecology · Cultural documentation · Material traditions · Plant taxonomy & biodiversity</span></div><div><Fingerprint/><b>Attribution states</b><span>Public source · Community-authorised · Restricted / consent required · Attribution incomplete · Unknown</span><small>Publicly accessible does not automatically mean free to reuse.</small></div></div></div><div className="ethno-footer-grid"><div><Languages/><b>Multilingual discovery</b><span>Curated English and Indic alias coverage, historical terminology and transliteration variants.</span></div><div><Clock3/><b>Historical context</b><span>Year markers and source-linked chronology candidates from the original text.</span></div><div><Scale/><b>Publication comparison</b><span>Shared plant mentions, timeline differences and duplicate passage signals.</span></div><div><ShieldCheck/><b>Knowledge stewardship</b><span>Attribution, consent, licence and community restriction warnings stay visible.</span></div></div>
+  <ResearchBridgePanel section="ethno" title="Search documented botanical knowledge" description="Search taxonomic identities, public biodiversity records and bibliographic discovery sources alongside the archive analysis. Historical and community knowledge still requires attribution, consent and context review." />
  </div>;
 }
