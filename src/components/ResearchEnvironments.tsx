@@ -104,7 +104,7 @@ async function queryData(e:Env,q:string):Promise<{items:RecordItem[];summary:str
  const d=await r.json();const ids=d.esearchresult?.idlist||[];if(!ids.length)return {items:[],summary:"No indexed records found. Try a broader phrase or scientific synonym.",source:"NCBI E-utilities / PubMed"};
  const s=await fetch("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id="+ids.join(",")+"&retmode=json");if(!s.ok)throw new Error("PubMed metadata retrieval failed.");const z=await s.json();
  const records=ids.map((id:string)=>{const p=z.result?.[id]||{};return {title:p.title||"Untitled indexed record",sub:[p.pubdate,p.fulljournalname].filter(Boolean).join(" · "),detail:(p.authors||[]).slice(0,4).map((a:any)=>a.name).join(", ")||"Author metadata unavailable",url:"https://pubmed.ncbi.nlm.nih.gov/"+id+"/",id:"PMID "+id};});
- const dated=records.map(x=>({year:Number((x.sub.match(/\\b(19|20)\\d{2}\\b/)||[])[0]||0),journal:x.sub.split(" · ").slice(1).join(" · ")}));
+ const dated=records.map(x=>({year:Number((x.sub.match(/\b(19|20)\d{2}\b/)||[])[0]||0),journal:x.sub.split(" · ").slice(1).join(" · ")}));
  const journals=new Set(dated.map(x=>x.journal).filter(Boolean));
  const metadataComplete=records.filter(x=>x.title&&x.sub&&x.detail!=="Author metadata unavailable").length;
  const taskSummaries:Record<string,string>={
