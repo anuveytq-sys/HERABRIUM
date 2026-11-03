@@ -6,7 +6,7 @@ import Globe from "./components/Globe";
 import KnowledgeGraph from "./components/KnowledgeGraph";
 import UploadLab from "./components/UploadLab";
 import EthnoKnowledgeLab from "./components/EthnoKnowledgeLab";
-import Biodiversity ExplorerLab from "./components/Biodiversity ExplorerLab";
+import PhytoChemLab from "./components/PhytoChemLab";
 import { demoStats, plants, researchGaps, type PlantRecord, type SourceRecord } from "./data";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -111,7 +111,7 @@ export default function App() {
         <div className="reveal"><EthnoKnowledgeLab/></div>
       </section>
 
-      <section className="phytochem-section section-pad" id="phytochem"><div className="section-index reveal"><span>03</span><i/> PHYTOCHEM / NATURAL PRODUCTS INTELLIGENCE</div><div className="section-heading reveal"><div><span className="eyebrow">BOTANICAL SPECIMEN DISCOVERY</span><h2>Explore the <em>botanical world.</em></h2></div><p>Explore botanical taxonomy, specimen provenance, morphology and geographic context through an interactive 3D specimen collection.</p></div><div className="reveal"><Biodiversity ExplorerLab/></div></section>
+      <section className="phytochem-section section-pad" id="phytochem"><div className="section-index reveal"><span>03</span><i/> PHYTOCHEM / NATURAL PRODUCTS INTELLIGENCE</div><div className="section-heading reveal"><div><span className="eyebrow">BOTANICAL SPECIMEN DISCOVERY</span><h2>Explore the <em>botanical world.</em></h2></div><p>Explore botanical taxonomy, specimen provenance, morphology and geographic context through an interactive 3D specimen collection.</p></div><div className="reveal"><PhytoChemLab/></div></section>
 
       <section className="graph-section section-pad" id="graph">
         <div className="section-index reveal"><span>03</span><i/> RELATIONSHIP INTELLIGENCE</div>
