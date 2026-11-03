@@ -71,3 +71,15 @@
 .ethno-footer-grid>div{display:flex;flex-direction:column;gap:8px;padding:18px 16px;border-right:1px solid var(--line)}.ethno-footer-grid>div:last-child{border-right:0}.ethno-footer-grid svg{color:var(--mint);width:17px}.ethno-footer-grid b{font-size:9px}.ethno-footer-grid span{font-size:8px;line-height:1.6;color:#829a8c}
 @media(max-width:900px){.ethno-workspace{grid-template-columns:1fr}.ethno-ingest{border-right:0;border-bottom:1px solid var(--line)}.ethno-footer-grid{grid-template-columns:repeat(2,1fr)}.ethno-footer-grid>div:nth-child(2){border-right:0}.ethno-footer-grid>div:nth-child(-n+2){border-bottom:1px solid var(--line)}}
 @media(max-width:600px){.ethno-header{padding:25px 20px 20px}.ethno-sigil{width:75px;height:75px}.ethno-sigil>svg{width:23px}.ethno-pipeline{justify-content:flex-start;overflow-x:auto;padding:18px 15px}.ethno-pipeline>div{min-width:70px}.ethno-pipeline>i{min-width:15px}.ethno-ingest,.ethno-results{padding:19px}.ethno-stats{grid-template-columns:repeat(2,1fr)}.ethno-tabs button{padding:11px 8px;font-size:8px}.ethno-entity>p{grid-template-columns:1fr 38px;margin-left:0}.ethno-entity q{grid-column:1/-1}.ethno-footer-grid{grid-template-columns:1fr 1fr}.ethno-footer-grid>div{padding:13px 10px}.ethno-results-top{align-items:flex-start}.ethno-export{font-size:7px}.ethno-score{align-items:flex-start}.compare-line{flex-direction:column}.compare-line span{text-align:left}}
+
+.ethno-export-group{display:flex;gap:6px}
+.ethno-explorer{padding:20px 24px;border-top:1px solid var(--line);position:relative}
+.ethno-explorer-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.ethno-explorer-title>b{font-size:10px;color:#dcebe0}
+.ethno-explorer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.ethno-explorer-grid>div{display:flex;flex-direction:column;gap:7px;padding:14px;border:1px solid rgba(141,240,181,.14);background:rgba(141,240,181,.025)}
+.ethno-explorer-grid svg{color:var(--mint);width:17px}
+.ethno-explorer-grid b{font-size:9px}
+.ethno-explorer-grid span{font-size:8px;line-height:1.7;color:#9bb0a4}
+.ethno-explorer-grid small{font-size:7px;line-height:1.6;color:#6f8a7b}
+@media(max-width:600px){.ethno-explorer{padding:17px}.ethno-explorer-title{align-items:flex-start;flex-direction:column}.ethno-explorer-grid{grid-template-columns:1fr}}
