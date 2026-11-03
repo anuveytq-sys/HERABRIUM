@@ -71,7 +71,9 @@ const taskPlans:Record<string,{task:string;terms:string;hint:string}>={
 const envs:Env[]=raw.map(x=>({id:x[0],name:x[1],track:x[2],mode:x[3],desc:x[4],task:taskPlans[x[0]].task,features:[taskPlans[x[0]].task,"Task-specific search strategy","Original source-linked records","Visible uncertainty and missing data"]}));
 type RecordItem={title:string;sub:string;detail:string;url:string;id:string};
 async function queryData(e:Env,q:string):Promise<{items:RecordItem[];summary:string;source:string}>{
- if(!q.trim())throw new Error("Enter a search term for this environment’s specific task.");\n const plan=taskPlans[e.id];\n const scopedQuery=plan.terms ? plan.terms+" ("+q+")" : q;
+ if(!q.trim())throw new Error("Enter a search term for this environment’s specific task.");
+ const plan=taskPlans[e.id];
+ const scopedQuery=plan.terms ? plan.terms+" ("+q+")" : q;
  if(e.mode==="gbif"){
   const a=await fetch("https://api.gbif.org/v1/species/match?name="+encodeURIComponent(q));if(!a.ok)throw new Error("GBIF taxonomic service unavailable.");
   const t=await a.json();if(!t.scientificName)throw new Error("No GBIF taxonomic match. Try the accepted scientific name.");
