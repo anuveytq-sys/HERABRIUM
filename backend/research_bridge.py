@@ -67,7 +67,7 @@ class ResearchQuery(BaseModel):
     section: str = Field(default="general", max_length=40)
 
 
-def _get_json(url: str, timeout: float = 9.0) -> dict[str, Any]:
+def _get_json(url: str, timeout: float = 3.5) -> dict[str, Any]:
     request = URLRequest(
         url,
         headers={
@@ -335,22 +335,40 @@ async def research_query(payload: ResearchQuery, request: Request) -> dict[str, 
     if cached:
         return {**cached, "cached": True}
 
-    try:
-        taxon, wikidata, literature = await asyncio.gather(
-            asyncio.to_thread(_gbif_taxon, query),
-            asyncio.to_thread(_wikidata, query),
-            asyncio.to_thread(_crossref, query),
-        )
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    warnings: list[str] = []
+    provider_results = await asyncio.gather(
+        asyncio.to_thread(_gbif_taxon, query),
+        asyncio.to_thread(_wikidata, query),
+        asyncio.to_thread(_crossref, query),
+        return_exceptions=True,
+    )
+    taxon_result, wikidata_result, literature_result = provider_results
+
+    taxon = taxon_result if not isinstance(taxon_result, BaseException) else None
+    wikidata = wikidata_result if not isinstance(wikidata_result, BaseException) else []
+    literature = literature_result if not isinstance(literature_result, BaseException) else []
+
+    if isinstance(taxon_result, BaseException):
+        warnings.append("GBIF taxonomy lookup is temporarily unavailable; related-source results may still be shown.")
+    if isinstance(wikidata_result, BaseException):
+        warnings.append("Wikidata could not be reached; taxonomy and other available results are still shown.")
+    if isinstance(literature_result, BaseException):
+        warnings.append("Crossref publication discovery is temporarily unavailable; other available results are still shown.")
 
     occurrence_data: dict[str, Any] = {"total_indexed_records": 0, "returned_records": 0, "records": []}
     if taxon and taxon.get("key"):
         try:
-            occurrence_data = await asyncio.to_thread(_gbif_occurrences, int(taxon["key"]))
-        except RuntimeError as exc:
-            # Taxonomy and literature are still useful if occurrence retrieval is temporarily unavailable.
-            occurrence_data["warning"] = str(exc)
+            occurrence_data = await asyncio.wait_for(
+                asyncio.to_thread(_gbif_occurrences, int(taxon["key"])),
+                timeout=4.0,
+            )
+        except (RuntimeError, asyncio.TimeoutError) as exc:
+            # Keep the accepted taxonomy and other provider results visible even
+            # when the occurrence endpoint is slow or temporarily unavailable.
+            occurrence_data["warning"] = (
+                str(exc) if isinstance(exc, RuntimeError)
+                else "GBIF occurrence retrieval timed out; taxonomy results are still available."
+            )
 
     insights = _section_insights(section, taxon, occurrence_data)
     section_name = SECTION_NAMES[section]
@@ -366,12 +384,13 @@ async def research_query(payload: ResearchQuery, request: Request) -> dict[str, 
             "The related knowledge and publication matches below are discovery candidates and need manual verification."
         )
 
-    warnings = [
+    warnings.extend([
         "GBIF occurrence totals describe indexed records, not population size, abundance or a complete field census.",
         "Only the first 15 occurrence records are returned by this endpoint; use the GBIF portal for broader exploration.",
         "Wikidata and Crossref matches are discovery metadata. Verify the original source before citing or treating a statement as established.",
         "No scanned-document OCR, full-text article access, medical interpretation or clinical assessment is performed.",
     ]
+    ])
     if occurrence_data.get("warning"):
         warnings.append(occurrence_data["warning"])
     if not taxon:
