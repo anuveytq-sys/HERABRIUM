@@ -22,7 +22,7 @@ const styles = `
 @media(max-width:900px){.b4grid{grid-template-columns:repeat(2,minmax(0,1fr))}.b4controls{grid-template-columns:1fr 1fr}.b4controls .b4field:first-child{grid-column:1/-1}.b4layout{grid-template-columns:1fr}.b4stats{grid-template-columns:repeat(3,minmax(0,1fr))}.b4tax{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.b4grid{grid-template-columns:1fr}.b4card{min-height:0}.b4controls{grid-template-columns:1fr}.b4controls .b4field:first-child{grid-column:auto}.b4stats{grid-template-columns:repeat(2,minmax(0,1fr))}.b4record{grid-template-columns:25px minmax(0,1fr) auto}}
 `;
-function normaliseQuery(value:string){return value.trim().replace(/^(where (is|are)|distribution of|occurrence records for|show me|find|search for|map|records for|tell me about)\s+/i,"").replace(/[?.!,]+$/,"").trim();}
+function normaliseQuery(value:string){return value.trim().replace(/^(?:where (?:is|are|can i find)|what is the distribution of|what are the occurrence records for|distribution of|occurrence records for|show(?: me)?(?: the)?(?: occurrence records for)?|find|search for|map(?: occurrences of)?|records for|tell me about|how many occurrences of|how many records for)\s+/i,"").replace(/\s+(?:found|distributed|occurs|grows|native to|present)\s*$/i,"").replace(/[?.!,]+$/,"").trim();}
 function mapRowsForDensity(rows:Occurrence[],specimensOnly:boolean){return specimensOnly?rows.filter(o=>o.basisOfRecord==="PRESERVED_SPECIMEN"):rows;}
 function project(lon:number,lat:number){return {x:((lon+180)/360)*720,y:((90-lat)/180)*300};}
 function safeDate(o:Occurrence){return o.eventDate|| (o.year?String(o.year):"Date not supplied");}
@@ -89,6 +89,19 @@ export default function ResearchEnvironments({onClose}:{onClose:()=>void}){
    const facetParams=new URLSearchParams({taxonKey:String(taxon.key),limit:"0",facet:"country",facetLimit:"20",facetOffset:"0"});
    const facetResponse=await fetch(API+"/occurrence/search?"+facetParams.toString());
    if(facetResponse.ok){const facetPayload=await facetResponse.json();setRegional((facetPayload.facets?.[0]?.counts||[]).map((x:{name:string;count:number})=>({name:x.name,count:x.count})));}else setRegional([]);
+   const conservationResponse=await fetch(API+"/species/"+taxon.key+"/iucnRedListCategory");
+   if(conservationResponse.ok){
+    const conservationData=await conservationResponse.json();
+    const conservationRows=Array.isArray(conservationData)?conservationData:(conservationData?.results||[conservationData]);
+    const found=conservationRows.find((x:any)=>typeof x==="string"||x?.category||x?.threatStatus||x?.code);
+    setIucnCategory(typeof found==="string"?found:(found?.category||found?.threatStatus||found?.code||null));
+   }else setIucnCategory(null);
+   if(country){
+    const richnessParams=new URLSearchParams({country:country.toUpperCase(),limit:"0",facet:"speciesKey",facetLimit:"1000",facetOffset:"0"});
+    const richnessResponse=await fetch(API+"/occurrence/search?"+richnessParams.toString());
+    if(richnessResponse.ok){const richnessData=await richnessResponse.json();const count=richnessData.facets?.[0]?.counts?.length||0;setRegionalRichness({country:country.toUpperCase(),count,truncated:count>=1000});}
+    else setRegionalRichness(null);
+   }else setRegionalRichness(null);
    setResult({taxon,count:Number(payload.count||0),occurrences:rows,source:"GBIF Species API + Occurrence API"});
    setComparison([]);
   }catch(e){setError(e instanceof Error?e.message:"The live biodiversity lookup failed. Please retry.");}
