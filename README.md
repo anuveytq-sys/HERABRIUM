@@ -45,9 +45,9 @@ HERBARIUM brings botanical identity, documented cultural context, historical pub
 - Interactive Three.js 3D globe with coordinate-backed occurrence points and drag-to-rotate interaction.
 - Geographic distribution map with occurrence points, an aggregated coordinate-density heatmap and specimen-only layer control.
 - Filters for country code, year, record basis and georeferenced-only records.
-- Biodiversity coverage statistics, regional country facets, observation timelines and metadata completeness indicators.
+- Biodiversity coverage statistics, country occurrence facets, country-level indexed species-richness estimates, observation timelines and metadata completeness indicators.
 - Cross-taxon comparison for up to three taxa using GBIF occurrence totals.
-- Record-level provenance including dataset, institution, collection, collector, catalogue number, event date and GBIF occurrence identifier when supplied.
+- Record-level provenance including dataset, institution, collection, collector, catalogue number, event date, habitat/field notes and GBIF occurrence identifier when supplied.\n- GBIF-linked IUCN Red List category display when a taxon has a linked category; missing categories remain explicitly unclassified.
 - Paginated occurrence results (100 records per page) with CSV and GeoJSON exports of the fetched page.
 - Task-specific observatory summaries for observation gaps, environmental-data readiness, specimen provenance, ecological connections, conservation evidence readiness and clearly hypothetical sustainability scenarios.
 
@@ -74,7 +74,7 @@ Set `VITE_API_BASE_URL=http://localhost:8000` in a local `.env` file to connect 
 
 - Included plant profiles and specimen records are starter demonstrations, not a complete flora or verified voucher collection.
 - The Indian Virtual Herbarium is an institutional reference entry point; HERBARIUM does not claim to have bulk-imported its specimen data.
-- Phase 4 maps only the coordinate-backed GBIF records fetched for the current page; records without coordinates are omitted from maps when the georeferenced-only filter is active.\n- Regional facets and timelines describe the returned GBIF index, not a complete census of biodiversity or population abundance.\n- Phase 4 does not calculate extinction risk, assign IUCN categories, infer climate impacts, authenticate specimen vouchers or predict sustainability outcomes. Those require separate authoritative data and methods.\n- The sustainability slider is a transparent arithmetic scenario over the indexed count, not a forecast.
+- Phase 4 maps only the coordinate-backed GBIF records fetched for the current page; records without coordinates are omitted from maps when the georeferenced-only filter is active.\n- Regional facets and timelines describe the returned GBIF index, not a complete census of biodiversity or population abundance.\n- Phase 4 does not infer extinction risk from occurrence density, infer climate impacts or environmental pressures, authenticate physical specimen vouchers or predict sustainability outcomes. IUCN categories appear only when GBIF returns a linked assessment; no result is not interpreted as a category. Country species-richness values are GBIF-indexed distinct taxon keys, not a field census.\n- The sustainability slider is a transparent arithmetic scenario over the indexed count, not a forecast.
 - Document extraction is an explainable lexicon-and-pattern baseline, not a trained multilingual model.
 - Scanned-image OCR is not included. PDFs need selectable text.
 - Citation, timeline and summary outputs are candidates and require human review.
@@ -83,7 +83,7 @@ Set `VITE_API_BASE_URL=http://localhost:8000` in a local `.env` file to connect 
 
 Traditional and Indigenous knowledge must retain attribution, cultural context and permission boundaries. Public accessibility does not automatically grant permission to reuse knowledge.
 
-## Official botanical references
+## Phase 4 biodiversity data source\n\n- Global Biodiversity Information Facility — [API documentation](https://techdocs.gbif.org/en/openapi/) and [data portal](https://www.gbif.org/).\n\n## Official botanical references
 
 - Botanical Survey of India — [Indian Virtual Herbarium](https://ivh.bsi.gov.in/)
 - Botanical Survey of India — [Virtual Herbarium overview](https://bsi.gov.in/page/en/virtual-herbarium)
