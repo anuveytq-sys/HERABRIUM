@@ -49,11 +49,14 @@ successful responses are cached in memory for five minutes. The bridge uses
 official public APIs (GBIF, Wikidata and Crossref), not HTML scraping, and
 requires no API keys. Public services may rate-limit or temporarily fail.
 
-Important integration boundary: this endpoint is backend-only. Existing
-frontend panels have not been modified and therefore do not call this endpoint
-yet. A panel must send its current query and section key to this route before
-the bridge can populate that panel. This backend-only change deliberately
-preserves the frontend exactly as requested.
+Frontend integration: the existing section layouts and visual identity are
+preserved, while a small research console now calls this endpoint from the
+Phase 1 intelligence catalogue, Phase 2 EthnoKnowledge workspace, Phase 3
+botanical specimen explorer, Phase 4 biodiversity environments, relationship
+graph, data-quality workspace and document lab. Phase 4 also calls the bridge
+when its existing taxon search is submitted; if the direct GBIF taxonomy
+lookup cannot resolve a common name, the bridge's accepted taxon and
+occurrence sample can populate the existing biodiversity result view.
 
 The bridge is limited to non-clinical taxonomy, biodiversity observations,
 botanical/specimen provenance, ecological metadata and bibliographic
