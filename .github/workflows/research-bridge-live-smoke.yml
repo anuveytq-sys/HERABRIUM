@@ -1,0 +1,62 @@
+name: Research Bridge Live Smoke Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/research_bridge.py"
+      - "src/components/ResearchBridgePanel.tsx"
+      - "vercel.json"
+      - ".github/workflows/research-bridge-live-smoke.yml"
+  workflow_dispatch:
+
+jobs:
+  live-research-query:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Wait for the updated production bridge
+        env:
+          BASE_URL: https://herbarium-intelligence.vercel.app
+        run: |
+          for attempt in $(seq 1 60); do
+            status=$(curl -sS -o /tmp/bridge-health.json -w "%{http_code}" "$BASE_URL/api/v1/research/health" || true)
+            if [ "$status" = "200" ] && grep -q '"bridge":"ready"' /tmp/bridge-health.json; then
+              cat /tmp/bridge-health.json
+              exit 0
+            fi
+            echo "Waiting for updated production bridge (attempt $attempt/60, HTTP $status)"
+            sleep 5
+          done
+          echo "Updated production bridge did not become available."
+          exit 1
+
+      - name: Submit a real production research query
+        env:
+          BASE_URL: https://herbarium-intelligence.vercel.app
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 40 \
+            -X POST "$BASE_URL/api/v1/research/query" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            --data '{"query":"Ganga dolphin","section":"biosphere"}' \
+            -o /tmp/research-result.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("/tmp/research-result.json").read_text())
+          assert result.get("query") == "Ganga dolphin", result
+          assert result.get("section") == "biosphere", result
+          assert isinstance(result.get("overview"), str) and result["overview"], result
+          assert isinstance(result.get("occurrences"), list), result
+          assert isinstance(result.get("warnings"), list), result
+          taxon = result.get("taxon") or {}
+          assert "platanista gangetica" in (taxon.get("scientific_name") or "").casefold(), result
+          print("LIVE RESEARCH BRIDGE PASS")
+          print("Accepted taxon:", taxon.get("scientific_name"))
+          print("Indexed occurrences:", result.get("occurrence_summary", {}).get("total_indexed_records"))
+          print("Returned occurrence sample:", len(result.get("occurrences", [])))
+          print("Related knowledge:", len(result.get("related_knowledge", [])))
+          print("Publication candidates:", len(result.get("literature_candidates", [])))
+          PY
