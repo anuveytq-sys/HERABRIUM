@@ -5,6 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Globe from "./components/Globe";
 import KnowledgeGraph from "./components/KnowledgeGraph";
 import UploadLab from "./components/UploadLab";
+import EthnoKnowledgeLab from "./components/EthnoKnowledgeLab";
 import { demoStats, plants, researchGaps, type PlantRecord, type SourceRecord } from "./data";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -54,7 +55,7 @@ export default function App() {
     <header className="topbar">
       <a className="brand" href="#home" aria-label="HERBARIUM home"><span className="brand-mark"><Leaf size={19}/></span><span>HERBARIUM<small>INTELLIGENCE NETWORK</small></span></a>
       <nav className={menuOpen ? "nav-links open" : "nav-links"}>
-        <button onClick={() => navigate("intelligence")}>Intelligence</button><button onClick={() => navigate("graph")}>Knowledge graph</button><button onClick={() => navigate("research")}>Research gaps</button><button onClick={() => navigate("laboratory")}>Document lab</button>
+        <button onClick={() => navigate("intelligence")}>Intelligence</button><button onClick={() => navigate("ethno")}>EthnoKnowledge AI</button><button onClick={() => navigate("graph")}>Knowledge graph</button><button onClick={() => navigate("research")}>Research gaps</button><button onClick={() => navigate("laboratory")}>Document lab</button>
       </nav>
       <div className="topbar-right"><span className="system-status"><i/> SYSTEM {apiOnline ? "CONNECTED" : "LOCAL DEMO"}</span><button className="icon-button mobile-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">{menuOpen ? <X/> : <Menu/>}</button><button className="button button-outline header-cta" onClick={() => navigate("intelligence")}>Explore network <ArrowUpRight size={15}/></button></div>
     </header>
@@ -103,6 +104,12 @@ export default function App() {
         </div>
       </section>
 
+      <section className="ethno-section section-pad" id="ethno">
+        <div className="section-index reveal"><span>02</span><i/> ETHNOKNOWLEDGE AI / PHASE TWO</div>
+        <div className="section-heading reveal"><div><span className="eyebrow">HISTORICAL KNOWLEDGE MINING</span><h2>Decode the archive.<br/><em>Preserve its context.</em></h2></div><p>Multilingual plant-name discovery, historical terminology, citation and timeline extraction, cross-publication comparison and permission-aware stewardship.</p></div>
+        <div className="reveal"><EthnoKnowledgeLab/></div>
+      </section>
+
       <section className="graph-section section-pad" id="graph">
         <div className="section-index reveal"><span>03</span><i/> RELATIONSHIP INTELLIGENCE</div>
         <div className="section-heading reveal"><div><span className="eyebrow">SOURCE-LINKED RELATIONSHIPS</span><h2>See the science<br/><em>between the lines.</em></h2></div><p>Explore a transparent relationship map for the selected species. Select a node to inspect what the connection means and what still needs verification.</p></div>
@@ -130,8 +137,8 @@ export default function App() {
       </section>
 
       <section className="final-cta section-pad">
-        <div className="cta-orb"/><span className="eyebrow reveal">HERBARIUM INTELLIGENCE / PHASE 01</span><h2 className="reveal">Connect the knowledge.<br/><em>Respect the evidence.</em></h2><p className="reveal">A scientific intelligence layer for the world's botanical research landscape.</p><button className="button button-primary reveal" onClick={() => navigate("intelligence")}>Explore plant intelligence <ArrowUpRight size={16}/></button>
-        <div className="footer-meta"><span>HERBARIUM INTELLIGENCE NETWORK</span><span>BUILT FOR TRACEABLE DISCOVERY · PHASE 01</span><a href="https://github.com/anuveytq-sys/HERABRIUM" target="_blank" rel="noreferrer">SOURCE REPOSITORY <ArrowUpRight size={13}/></a></div>
+        <div className="cta-orb"/><span className="eyebrow reveal">HERBARIUM INTELLIGENCE / PHASE 02</span><h2 className="reveal">Connect the knowledge.<br/><em>Respect the evidence.</em></h2><p className="reveal">A scientific intelligence layer for the world's botanical research landscape.</p><button className="button button-primary reveal" onClick={() => navigate("intelligence")}>Explore plant intelligence <ArrowUpRight size={16}/></button>
+        <div className="footer-meta"><span>HERBARIUM INTELLIGENCE NETWORK</span><span>ETHNOKNOWLEDGE AI · PHASE 02</span><a href="https://github.com/anuveytq-sys/HERABRIUM" target="_blank" rel="noreferrer">SOURCE REPOSITORY <ArrowUpRight size={13}/></a></div>
       </section>
     </main>
     <SourceDrawer source={activeSource} onClose={() => setActiveSource(null)}/>

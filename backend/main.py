@@ -141,3 +141,7 @@ async def extract_document(file: UploadFile = File(...)) -> dict[str, Any]:
             "This baseline is not a trained biomedical NER model and may miss synonyms, OCR text and unfamiliar species.",
         ],
     }
+
+
+from ethnoknowledge import router as ethnoknowledge_router
+app.include_router(ethnoknowledge_router)

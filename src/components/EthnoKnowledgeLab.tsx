@@ -1,0 +1,49 @@
+import { useMemo, useState } from "react";
+import { Activity, AlertTriangle, ArrowDownToLine, BookOpen, CheckCircle2, ChevronDown, Clock3, FileSearch, FileText, Fingerprint, Languages, Leaf, LoaderCircle, Network, Scale, ShieldCheck, Sparkles, UploadCloud } from "lucide-react";
+import { analyzeEthnoDocument, compareEthnoDocuments, type EthnoAnalysis, type EthnoComparison } from "../lib/api";
+
+const regions=["Unspecified","South Asia","East Asia","West Africa","Europe","Latin America"];
+const tabs=["Overview","Plant & language","Timeline","Source audit","Compare"];
+function saveFile(name:string,content:string,type:string){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
+export default function EthnoKnowledgeLab(){
+ const [files,setFiles]=useState<File[]>([]),[region,setRegion]=useState("South Asia"),[active,setActive]=useState("Overview");
+ const [result,setResult]=useState<EthnoAnalysis|null>(null),[comparison,setComparison]=useState<EthnoComparison|null>(null),[loading,setLoading]=useState(false),[error,setError]=useState("");
+ const primary=files[0];
+ const stats=useMemo(()=>result?[
+  {label:"Plant identities",value:result.plant_entities.length.toString().padStart(2,"0")},
+  {label:"Citation candidates",value:result.citations.length.toString().padStart(2,"0")},
+  {label:"Timeline markers",value:result.timeline.length.toString().padStart(2,"0")},
+  {label:"Table grids",value:result.table_extraction.tables_detected.toString().padStart(2,"0")}
+ ]:[],[result]);
+ async function runAnalysis(){if(!primary)return;setLoading(true);setError("");setComparison(null);try{setResult(await analyzeEthnoDocument(primary,region));setActive("Overview");}catch(e){setError(e instanceof Error?e.message:"Could not analyse this document.");}finally{setLoading(false);}}
+ async function runComparison(){if(files.length<2)return;setLoading(true);setError("");try{setComparison(await compareEthnoDocuments(files,region));setActive("Compare");}catch(e){setError(e instanceof Error?e.message:"Comparison failed.");}finally{setLoading(false);}}
+ const download=()=>result&&saveFile("herbarium-ethnoknowledge-"+Date.now()+".json",JSON.stringify(result,null,2),"application/json");
+ return <div className="ethno-lab">
+  <div className="ethno-header"><div><span className="eyebrow">PHASE 02 / ETHNOKNOWLEDGE AI</span><h3>Decode the <em>living archive.</em></h3><p>Transform historical botanical documents into traceable, multilingual research candidates — while preserving source context, attribution and uncertainty.</p></div><div className="ethno-sigil"><div className="sigil-ring"/><div className="sigil-ring second"/><Leaf size={35}/><span>EK / 02</span></div></div>
+  <div className="ethno-pipeline"><div><span>01</span><b>INGEST</b><small>PDF / TEXT</small></div><i/><div><span>02</span><b>DECODE</b><small>ALIASES / OCR-READY</small></div><i/><div><span>03</span><b>TRACE</b><small>PROVENANCE</small></div><i/><div><span>04</span><b>COMPARE</b><small>PUBLICATIONS</small></div><i/><div><span>05</span><b>REVIEW</b><small>HUMAN CONTROL</small></div></div>
+  <div className="ethno-workspace">
+   <aside className="ethno-ingest">
+    <div className="ethno-card-label"><UploadCloud size={15}/> ARCHIVE INGESTION</div>
+    <label className="ethno-drop"><input type="file" accept=".pdf,.txt,.md" multiple onChange={e=>{setFiles(Array.from(e.target.files||[]).slice(0,5));setResult(null);setComparison(null);setError("");}}/><FileSearch size={27}/><strong>{files.length?files.length+" document(s) selected":"Drop historical archives"}</strong><span>PDF · TXT · MD / 12 MB each / max 5</span><small>Scanned-image OCR is not yet enabled; PDFs must contain selectable text.</small></label>
+    {files.map((file,i)=><div className="ethno-file" key={file.name+i}><FileText size={14}/><span>{file.name}<small>{(file.size/1024).toFixed(0)} KB</small></span><b>{i===0?"PRIMARY":"COMPARE"}</b></div>)}
+    <label className="ethno-select-label">REGIONAL CONTEXT <ChevronDown size={13}/><select value={region} onChange={e=>setRegion(e.target.value)}>{regions.map(x=><option key={x}>{x}</option>)}</select></label>
+    <button className="button button-primary full" onClick={runAnalysis} disabled={!primary||loading}>{loading?<><LoaderCircle className="spin" size={15}/> DECODING ARCHIVE</>:"Analyse archive"} <Sparkles size={14}/></button>
+    <button className="button button-outline full" onClick={runComparison} disabled={files.length<2||loading}><Scale size={15}/> Compare publications ({files.length}/5)</button>
+    {error&&<div className="inline-warning">{error}</div>}
+    <div className="ethno-privacy"><ShieldCheck size={15}/><span>Review-first processing. No traditional-use claim is promoted as medical advice or validated efficacy.</span></div>
+   </aside>
+   <div className="ethno-results">
+    <div className="ethno-results-top"><div><span className="eyebrow">INTELLIGENCE CONSOLE / EK-02</span><h4>{comparison?"Cross-publication analysis":result?result.document_name:"Awaiting archive signal"}</h4></div>{result&&<button className="ethno-export" onClick={download}><ArrowDownToLine size={14}/> EXPORT JSON</button>}</div>
+    {result&&!comparison&&<><div className="ethno-stats">{stats.map(s=><div key={s.label}><strong>{s.value}</strong><span>{s.label}</span></div>)}</div><div className="ethno-tabs">{tabs.filter(t=>t!=="Compare").map(t=><button className={active===t?"active":""} onClick={()=>setActive(t)} key={t}>{t}</button>)}</div>
+     {active==="Overview"&&<div className="ethno-panel"><div className="ethno-score"><div className="score-ring" style={{"--score":result.source_quality.score+"%"} as React.CSSProperties}><strong>{result.source_quality.score}</strong><small>/100</small></div><div><span className="eyebrow">METADATA COMPLETENESS SIGNAL</span><b>{result.source_quality.band}</b><p>{result.source_quality.warning}</p></div></div><div className="ethno-summary"><span className="eyebrow">EXTRACTIVE SUMMARY CANDIDATES</span>{result.summary_candidates.length?result.summary_candidates.map((s,i)=><p key={i}>{s}</p>):<p>No sufficiently long candidate sentences found. Review the original document.</p>}</div><div className="ethno-classifications"><span className="eyebrow">DOCUMENT CLASSIFICATION</span><div>{result.classification.map(x=><span key={x}>{x}</span>)}</div></div></div>}
+     {active==="Plant & language"&&<div className="ethno-panel">{result.plant_entities.length?result.plant_entities.map(p=><article className="ethno-entity" key={p.scientific_name}><div><Leaf size={17}/><span><b>{p.scientific_name}</b><small>{p.family} · {p.mention_count} matched mentions</small></span><em>CANDIDATE</em></div>{p.mentions.slice(0,12).map((m,i)=><p key={i}><span>{m.matched_term}</span><small>{m.language.toUpperCase()}</small><q>{m.excerpt}</q></p>)}</article>):<p className="ethno-empty">No starter-lexicon match. This is not proof that the document contains no plant knowledge.</p>}<div className="ethno-language-note"><Languages size={15}/>{result.language_support_note}</div></div>}
+     {active==="Timeline"&&<div className="ethno-panel"><div className="timeline-track">{result.timeline.length?result.timeline.map(t=><div key={t.year}><span>{t.year}</span><i/><b>{t.mentions} mention(s)</b><small>{t.context}</small></div>):<p>No year markers detected.</p>}</div></div>}
+     {active==="Source audit"&&<div className="ethno-panel"><div className="audit-heading"><Fingerprint/><div><b>Attribution & source integrity</b><small>Signals for human review — not a trust verdict.</small></div></div>{result.citations.map((c,i)=><div className="citation-row" key={i}><span>{c.type}</span><b>{c.value}</b><small>{c.verification}</small></div>)}{result.missing_attribution_warnings.map((w,i)=><div className="warning-row" key={i}><AlertTriangle size={14}/>{w}</div>)}{result.duplicate_signals.map((d,i)=><div className="warning-row" key={i}><FileSearch size={14}/>{d.detail}</div>)}<div className="ethno-ethical"><ShieldCheck size={15}/>{result.ethical_status}</div></div>}
+    </>}
+    {comparison&&<div className="ethno-panel compare-panel"><div className="compare-hero"><Network size={24}/><div><span className="eyebrow">CROSS-PUBLICATION RELATIONSHIP MAP</span><strong>{comparison.documents.length} archives compared</strong></div></div><div className="overlap-grid">{comparison.document_overlap.map(x=><div key={x.plant}><b>{x.document_count}</b><span>{x.plant}</span><small>documents mention this taxon</small></div>)}</div><h5>Document-by-document timeline</h5>{comparison.timeline_comparison.map(x=><div className="compare-line" key={x.document}><b>{x.document}</b><span>{x.years.length?x.years.join(" · "):"No years detected"}</span></div>)}{comparison.review_flags.map(x=><div className="warning-row"><AlertTriangle size={14}/>{x}</div>)}</div>}
+    {!result&&!comparison&&<div className="ethno-empty-state"><div className="empty-radar"><i/><i/><i/><Leaf size={28}/></div><strong>Waiting for a document</strong><p>Upload a historical materia medica, ethnobotanical publication or archive to initialise the EthnoKnowledge engine.</p><span>NO AUTOMATIC HEALTH CLAIMS · HUMAN REVIEW REQUIRED</span></div>}
+   </div>
+  </div>
+  <div className="ethno-footer-grid"><div><Languages/><b>Multilingual discovery</b><span>Curated English and Indic alias coverage, historical terminology and transliteration variants.</span></div><div><Clock3/><b>Historical context</b><span>Year markers and source-linked chronology candidates from the original text.</span></div><div><Scale/><b>Publication comparison</b><span>Shared plant mentions, timeline differences and duplicate passage signals.</span></div><div><ShieldCheck/><b>Knowledge stewardship</b><span>Attribution, consent, licence and community restriction warnings stay visible.</span></div></div>
+ </div>;
+}

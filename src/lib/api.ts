@@ -28,3 +28,31 @@ export async function checkApi(): Promise<boolean> {
     return response.ok;
   } catch { return false; }
 }
+
+export type EthnoAnalysis = {
+  document_name:string; region_context:string; classification:string[];
+  plant_entities:Array<{scientific_name:string;family:string;mention_count:number;mentions:Array<{matched_term:string;language:string;excerpt:string}>;identity_status:string}>;
+  compound_mentions:Array<{name:string;status:string}>;
+  citations:Array<{type:string;value:string;verification:string}>;
+  timeline:Array<{year:number;mentions:number;context:string}>;
+  summary_candidates:string[];
+  table_extraction:{tables_detected:number;tables:Array<{page:number;rows:unknown[][]}>};
+  source_quality:{score:number;band:string;signals:Record<string,unknown>;warning:string};
+  missing_attribution_warnings:string[];duplicate_signals:Array<{type:string;detail:string}>;
+  page_count:number;language_support_note:string;ethical_status:string;review_required:boolean;
+};
+export type EthnoComparison = {documents:EthnoAnalysis[];shared_plant_entities:string[];document_overlap:Array<{plant:string;document_count:number}>;timeline_comparison:Array<{document:string;years:number[]}>;review_flags:string[];comparison_mode:string};
+export async function analyzeEthnoDocument(file:File,region:string):Promise<EthnoAnalysis>{
+  if(!API_BASE)throw new Error("EthnoKnowledge API is not configured.");
+  const form=new FormData();form.append("file",file);form.append("region",region);
+  const response=await fetch(API_BASE+"/api/v1/ethno/analyze",{method:"POST",body:form});
+  if(!response.ok)throw new Error(await response.text()||"Analysis failed.");
+  return response.json();
+}
+export async function compareEthnoDocuments(files:File[],region:string):Promise<EthnoComparison>{
+  if(!API_BASE)throw new Error("EthnoKnowledge API is not configured.");
+  const form=new FormData();files.forEach(file=>form.append("files",file));form.append("region",region);
+  const response=await fetch(API_BASE+"/api/v1/ethno/compare",{method:"POST",body:form});
+  if(!response.ok)throw new Error(await response.text()||"Comparison failed.");
+  return response.json();
+}
