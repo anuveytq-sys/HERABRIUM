@@ -79,7 +79,7 @@ export default function App() {
         <div className="section-index reveal"><span>01</span><i/> THE RESEARCH CHALLENGE</div>
         <div className="manifesto-grid">
           <div className="reveal"><span className="eyebrow">A CONNECTED SCIENTIFIC LANDSCAPE</span><h2>Research knowledge is everywhere.<br/><em>Context is fragmented.</em></h2></div>
-          <div className="manifesto-copy reveal"><p>Botanical identity, ethnobotanical records, chemical literature and biodiversity observations often live in separate sources. HERBARIUM creates a traceable layer between them — helping researchers explore connections without turning preliminary records into medical claims.</p><div className="principle"><ShieldCheck/><div><strong>Evidence before assertion.</strong><span>Every record carries its source, status and limitations.</span></div></div></div>
+          <div className="manifesto-copy reveal"><p>Botanical identity, ethnobotanical records, botanical literature and biodiversity observations often live in separate sources. HERBARIUM creates a traceable layer between them — helping researchers explore connections without turning preliminary records into medical claims.</p><div className="principle"><ShieldCheck/><div><strong>Evidence before assertion.</strong><span>Every record carries its source, status and limitations.</span></div></div></div>
         </div>
         <div className="signal-row reveal"><div><span>01 / DISCOVER</span><b>Find the plant</b></div><ChevronRight/><div><span>02 / EXTRACT</span><b>Structure the record</b></div><ChevronRight/><div><span>03 / CONNECT</span><b>Trace relationships</b></div><ChevronRight/><div><span>04 / QUESTION</span><b>Surface what is missing</b></div></div>
       </section>
@@ -111,7 +111,7 @@ export default function App() {
         <div className="reveal"><EthnoKnowledgeLab/></div>
       </section>
 
-      <section className="phytochem-section section-pad" id="phytochem"><div className="section-index reveal"><span>03</span><i/> PHYTOCHEM / NATURAL PRODUCTS INTELLIGENCE</div><div className="section-heading reveal"><div><span className="eyebrow">BOTANICAL SPECIMEN DISCOVERY</span><h2>Explore the <em>botanical world.</em></h2></div><p>Explore botanical taxonomy, specimen provenance, morphology and geographic context through an interactive 3D specimen collection.</p></div><div className="reveal"><PhytoChemLab/></div></section>
+      <section className="phytochem-section section-pad" id="phytochem"><div className="section-index reveal"><span>03</span><i/> BIODIVERSITY / SPECIMEN INTELLIGENCE</div><div className="section-heading reveal"><div><span className="eyebrow">BOTANICAL SPECIMEN DISCOVERY</span><h2>Explore the <em>botanical world.</em></h2></div><p>Explore botanical taxonomy, specimen provenance, morphology and geographic context through an interactive 3D specimen collection.</p></div><div className="reveal"><PhytoChemLab/></div></section>
 
       <section className="graph-section section-pad" id="graph">
         <div className="section-index reveal"><span>03</span><i/> RELATIONSHIP INTELLIGENCE</div>
@@ -124,7 +124,7 @@ export default function App() {
       <section className="research-section section-pad" id="research">
         <div className="section-index reveal"><span>04</span><i/> BOTANICAL DATA QUALITY</div>
         <div className="section-heading reveal"><div><span className="eyebrow">NOT JUST WHAT WE KNOW</span><h2>Make the missing<br/><em>visible.</em></h2></div><p>Gap cards are generated from the completeness and provenance state of the current starter dataset. They are actionable data-quality findings, not claims about the global state of science.</p></div>
-        <div className="gap-grid">{researchGaps.map((gap, index) => <article className="gap-card reveal" key={gap.title}><div className="gap-top"><span>GAP / 0{index + 1}</span><span className="gap-severity">{gap.severity}</span></div><div className="gap-icon">{[<Globe2/>, <BookOpen/>, <FileSearch/>, <Atom/>][index]}</div><h3>{gap.title}</h3><p>{gap.detail}</p><div className="gap-track">{gap.track}<ArrowUpRight size={14}/></div></article>)}</div>
+        <div className="gap-grid">{researchGaps.map((gap, index) => <article className="gap-card reveal" key={gap.title}><div className="gap-top"><span>GAP / 0{index + 1}</span><span className="gap-severity">{gap.severity}</span></div><div className="gap-icon">{[<Globe2/>, <BookOpen/>, <FileSearch/>, <Leaf/>][index]}</div><h3>{gap.title}</h3><p>{gap.detail}</p><div className="gap-track">{gap.track}<ArrowUpRight size={14}/></div></article>)}</div>
       </section>
 
       <section className="laboratory-section section-pad" id="laboratory">
@@ -136,7 +136,7 @@ export default function App() {
       <section className="ethics-section section-pad">
         <div className="section-index reveal"><span>06</span><i/> TRUST & KNOWLEDGE STEWARDSHIP</div>
         <div className="ethics-grid"><div className="reveal"><span className="eyebrow">A RESPONSIBLE RESEARCH NETWORK</span><h2>Knowledge has<br/>a <em>provenance.</em></h2><p>Traditional knowledge is not an unowned dataset. HERBARIUM is designed to preserve attribution, cultural context and permission boundaries.</p></div><div className="ethics-list reveal"><div><ShieldCheck/><span><b>Attribution first</b><small>Keep the origin, authorship and community context attached to every record.</small></span><CheckCircle2/></div><div><Database/><span><b>Permission-aware records</b><small>Support restricted, consent-based and public access states.</small></span><CheckCircle2/></div><div><Sparkles/><span><b>Human review</b><small>Keep extracted candidates separate from verified scientific records.</small></span><CheckCircle2/></div></div></div>
-        <div className="ethics-note reveal"><span>NON-CLINICAL RESEARCH TOOL</span><p>HERBARIUM does not diagnose, prescribe, assess personal medical suitability or establish that a plant or compound is safe or effective. It organises research information and makes uncertainty visible.</p></div>
+        <div className="ethics-note reveal"><span>NON-CLINICAL RESEARCH TOOL</span><p>HERBARIUM does not diagnose, prescribe, assess personal medical suitability or establish that a plant-related claim is safe or effective. It organises research information and makes uncertainty visible.</p></div>
       </section>
 
       <section className="final-cta section-pad">
