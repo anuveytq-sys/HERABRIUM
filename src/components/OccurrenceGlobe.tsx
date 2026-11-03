@@ -4,7 +4,6 @@ import * as THREE from "three";
 type PointRecord={key:number;decimalLatitude?:number;decimalLongitude?:number};
 export default function OccurrenceGlobe({records}:{records:PointRecord[]}){
  const host=useRef<HTMLDivElement>(null);
- const points=useRef<THREE.Points|null>(null);
  useEffect(()=>{
   const element=host.current;if(!element)return;
   const scene=new THREE.Scene();
@@ -20,7 +19,7 @@ export default function OccurrenceGlobe({records}:{records:PointRecord[]}){
   for(const r of records){if(!Number.isFinite(r.decimalLatitude)||!Number.isFinite(r.decimalLongitude))continue;const lat=THREE.MathUtils.degToRad(r.decimalLatitude as number),lon=THREE.MathUtils.degToRad(r.decimalLongitude as number);const radius=1.225;positions.push(-radius*Math.cos(lat)*Math.cos(lon),radius*Math.sin(lat),radius*Math.cos(lat)*Math.sin(lon));}
   const geometry=new THREE.BufferGeometry();geometry.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));
   const material=new THREE.PointsMaterial({color:0x9be5ad,size:.055,sizeAttenuation:true,transparent:true,opacity:.95});
-  const cloud=new THREE.Points(geometry,material);globe.add(cloud);points.current=cloud;
+  const cloud=new THREE.Points(geometry,material);globe.add(cloud);
   const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let frame=0,dragging=false,lastX=0,lastY=0,targetY=0,targetX=0;
   const down=(e:PointerEvent)=>{dragging=true;lastX=e.clientX;lastY=e.clientY;element.setPointerCapture?.(e.pointerId)};
