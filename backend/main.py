@@ -99,7 +99,7 @@ def capabilities() -> dict[str, Any]:
         "max_upload_bytes": MAX_UPLOAD_BYTES,
         "extraction_mode": "explainable-lexicon-and-pattern-NLP-baseline",
         "review_required": True,
-        "features": ["plant-mention-candidates", "compound-mention-candidates", "page-context", "provenance-ready-output"],
+        "features": ["plant-mention-candidates", "page-context", "provenance-ready-output"],
     }
 
 
