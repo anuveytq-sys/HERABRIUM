@@ -7,6 +7,7 @@ import KnowledgeGraph from "./components/KnowledgeGraph";
 import UploadLab from "./components/UploadLab";
 import EthnoKnowledgeLab from "./components/EthnoKnowledgeLab";
 import PhytoChemLab from "./components/PhytoChemLab";
+import ResearchEnvironments from "./components/ResearchEnvironments";
 import { demoStats, plants, researchGaps, type PlantRecord, type SourceRecord } from "./data";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -28,6 +29,7 @@ export default function App() {
   const [activeSource, setActiveSource] = useState<SourceRecord | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [apiOnline, setApiOnline] = useState(false);
+  const [hubOpen, setHubOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -58,7 +60,7 @@ export default function App() {
       <nav className={menuOpen ? "nav-links open" : "nav-links"}>
         <button onClick={() => navigate("intelligence")}>Intelligence</button><button onClick={() => navigate("ethno")}>EthnoKnowledge AI</button><button onClick={() => navigate("phytochem")}>Biodiversity Explorer</button><button onClick={() => navigate("graph")}>Knowledge graph</button><button onClick={() => navigate("research")}>Data gaps</button><button onClick={() => navigate("laboratory")}>Document lab</button>
       </nav>
-      <div className="topbar-right"><span className="system-status"><i/> SYSTEM {apiOnline ? "CONNECTED" : "LOCAL DEMO"}</span><button className="icon-button mobile-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">{menuOpen ? <X/> : <Menu/>}</button><button className="button button-outline header-cta" onClick={() => navigate("intelligence")}>Explore network <ArrowUpRight size={15}/></button></div>
+      <div className="topbar-right"><span className="system-status"><i/> SYSTEM {apiOnline ? "CONNECTED" : "LOCAL DEMO"}</span><button className="icon-button mobile-menu" onClick={() => setHubOpen(true)} aria-label="Open research environments"><Menu/></button><button className="button button-outline header-cta" onClick={() => navigate("intelligence")}>Explore network <ArrowUpRight size={15}/></button></div>
     </header>
 
     <main>
@@ -144,6 +146,7 @@ export default function App() {
         <div className="footer-meta"><span>HERBARIUM INTELLIGENCE NETWORK</span><span>ETHNOKNOWLEDGE AI · PHASE 02</span><a href="https://github.com/anuveytq-sys/HERABRIUM" target="_blank" rel="noreferrer">SOURCE REPOSITORY <ArrowUpRight size={13}/></a></div>
       </section>
     </main>
+    {hubOpen && <ResearchEnvironments onClose={() => setHubOpen(false)} />}
     <SourceDrawer source={activeSource} onClose={() => setActiveSource(null)}/>
   </div>;
 }
