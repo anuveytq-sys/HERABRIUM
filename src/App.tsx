@@ -9,6 +9,7 @@ import EthnoKnowledgeLab from "./components/EthnoKnowledgeLab";
 import PhytoChemLab from "./components/PhytoChemLab";
 import ResearchEnvironments from "./components/ResearchEnvironments";
 import ResearchBridgePanel from "./components/ResearchBridgePanel";
+import PhytoEvidenceLab from "./components/PhytoEvidenceLab";
 import { demoStats, plants, researchGaps, type PlantRecord, type SourceRecord } from "./data";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -59,7 +60,7 @@ export default function App() {
     <header className="topbar">
       <a className="brand" href="#home" aria-label="HERBARIUM home"><span className="brand-mark"><Leaf size={19}/></span><span>HERBARIUM<small>INTELLIGENCE NETWORK</small></span></a>
       <nav className={menuOpen ? "nav-links open" : "nav-links"}>
-        <button onClick={() => navigate("intelligence")}>Intelligence</button><button onClick={() => navigate("ethno")}>EthnoKnowledge AI</button><button onClick={() => navigate("phytochem")}>Specimen explorer</button><button onClick={() => navigate("graph")}>Knowledge graph</button><button onClick={() => navigate("research")}>Data gaps</button><button onClick={() => navigate("laboratory")}>Document lab</button><button className="nav-environments" onClick={() => { setMenuOpen(false); setHubOpen(true); }}>Phase 4 Biodiversity <ArrowUpRight size={13}/></button>
+        <button onClick={() => navigate("intelligence")}>Intelligence</button><button onClick={() => navigate("ethno")}>EthnoKnowledge AI</button><button onClick={() => navigate("phytochem")}>Specimen explorer</button><button onClick={() => navigate("graph")}>Knowledge graph</button><button onClick={() => navigate("research")}>Data gaps</button><button onClick={() => navigate("laboratory")}>Document lab</button><button onClick={() => navigate("phytoevidence")}>PhytoEvidence</button><button className="nav-environments" onClick={() => { setMenuOpen(false); setHubOpen(true); }}>Phase 4 Biodiversity <ArrowUpRight size={13}/></button>
       </nav>
       <div className="topbar-right"><span className="system-status"><i/> SYSTEM {apiOnline ? "CONNECTED" : "LOCAL DEMO"}</span><button className="icon-button mobile-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation menu">{menuOpen ? <X/> : <Menu/>}</button><button className="button button-outline header-cta" onClick={() => navigate("intelligence")}>Explore network <ArrowUpRight size={15}/></button></div>
     </header>
@@ -140,6 +141,12 @@ export default function App() {
         <ResearchBridgePanel section="documents" title="Research a document topic" description="Search the public research network for a topic found in your uploaded documents. Publication results are discovery candidates, not verified claims." />
       </section>
 
+      <section className="section-pad" id="phytoevidence" style={{background:"radial-gradient(ellipse at 12% 18%,rgba(37,112,75,.15),transparent 38%),#07110e",borderTop:"1px solid var(--line)"}}>
+        <div className="section-index reveal"><span>06</span><i/> PHYTOEVIDENCE / PHASE FIVE</div>
+        <div className="section-heading reveal"><div><span className="eyebrow">SOURCE-LINKED LITERATURE INTELLIGENCE</span><h2>Explore the <em>evidence landscape.</em></h2></div><p>Discover publications, classify botanical and biodiversity study records, inspect metadata coverage, save collections and prepare source-linked literature reviews. Research claims remain tied to original sources.</p></div>
+        <div className="reveal"><PhytoEvidenceLab/></div>
+      </section>
+
       <section className="ethics-section section-pad">
         <div className="section-index reveal"><span>06</span><i/> TRUST & KNOWLEDGE STEWARDSHIP</div>
         <div className="ethics-grid"><div className="reveal"><span className="eyebrow">A RESPONSIBLE RESEARCH NETWORK</span><h2>Knowledge has<br/>a <em>provenance.</em></h2><p>Traditional knowledge is not an unowned dataset. HERBARIUM is designed to preserve attribution, cultural context and permission boundaries.</p></div><div className="ethics-list reveal"><div><ShieldCheck/><span><b>Attribution first</b><small>Keep the origin, authorship and community context attached to every record.</small></span><CheckCircle2/></div><div><Database/><span><b>Permission-aware records</b><small>Support restricted, consent-based and public access states.</small></span><CheckCircle2/></div><div><Sparkles/><span><b>Human review</b><small>Keep extracted candidates separate from verified scientific records.</small></span><CheckCircle2/></div></div></div>
@@ -147,8 +154,8 @@ export default function App() {
       </section>
 
       <section className="final-cta section-pad">
-        <div className="cta-orb"/><span className="eyebrow reveal">HERBARIUM INTELLIGENCE / PHASE 02</span><h2 className="reveal">Connect the knowledge.<br/><em>Respect the evidence.</em></h2><p className="reveal">A scientific intelligence layer for the world's botanical research landscape.</p><button className="button button-primary reveal" onClick={() => navigate("intelligence")}>Explore plant intelligence <ArrowUpRight size={16}/></button>
-        <div className="footer-meta"><span>HERBARIUM INTELLIGENCE NETWORK</span><span>ETHNOKNOWLEDGE AI · PHASE 02</span><a href="https://github.com/anuveytq-sys/HERABRIUM" target="_blank" rel="noreferrer">SOURCE REPOSITORY <ArrowUpRight size={13}/></a></div>
+        <div className="cta-orb"/><span className="eyebrow reveal">HERBARIUM INTELLIGENCE / PHASE 05</span><h2 className="reveal">Connect the knowledge.<br/><em>Respect the evidence.</em></h2><p className="reveal">A scientific intelligence layer for the world's botanical research landscape.</p><button className="button button-primary reveal" onClick={() => navigate("intelligence")}>Explore plant intelligence <ArrowUpRight size={16}/></button>
+        <div className="footer-meta"><span>HERBARIUM INTELLIGENCE NETWORK</span><span>PHYTOEVIDENCE · PHASE 05</span><a href="https://github.com/anuveytq-sys/HERABRIUM" target="_blank" rel="noreferrer">SOURCE REPOSITORY <ArrowUpRight size={13}/></a></div>
       </section>
     </main>
     {hubOpen && <ResearchEnvironments onClose={() => setHubOpen(false)} />}
