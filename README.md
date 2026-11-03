@@ -28,7 +28,7 @@ HERBARIUM brings botanical identity, documented cultural context, historical pub
 - Cross-document comparison for up to five publications, including shared plant mentions, timeline differences and overlap indicators.
 - JSON and CSV exports.
 
-## Phase 3 — Biodiversity & Specimen Intelligence
+## Phase 3 — Botanical Specimen Intelligence
 
 - Searchable botanical specimen catalogue with starter taxonomy records.
 - Scientific name, common name, family, genus, broad region and habitat context.
@@ -37,6 +37,19 @@ HERBARIUM brings botanical identity, documented cultural context, historical pub
 - JSON catalogue export.
 - Institutional herbarium source links and specimen-verification guidance.
 - Provenance and data-quality warnings so illustrative records are never presented as verified vouchers.
+
+## Phase 4 — Biodiversity Explorer
+
+- Seven independent workspaces: BioSphere 3D, Biodiversity Risk Observatory, Climate Intelligence, Botanical Provenance, EcoNetwork Intelligence, Conservation Dashboard and Sustainability Simulator.
+- Live GBIF taxonomic name matching, accepted-name resolution for synonym matches, and occurrence retrieval for plants, animals, fungi and other indexed taxa.
+- Interactive Three.js 3D globe with coordinate-backed occurrence points and drag-to-rotate interaction.
+- Geographic distribution map with occurrence points, an aggregated coordinate-density heatmap and specimen-only layer control.
+- Filters for country code, year, record basis and georeferenced-only records.
+- Biodiversity coverage statistics, regional country facets, observation timelines and metadata completeness indicators.
+- Cross-taxon comparison for up to three taxa using GBIF occurrence totals.
+- Record-level provenance including dataset, institution, collection, collector, catalogue number, event date and GBIF occurrence identifier when supplied.
+- Paginated occurrence results (100 records per page) with CSV and GeoJSON exports of the fetched page.
+- Task-specific observatory summaries for observation gaps, environmental-data readiness, specimen provenance, ecological connections, conservation evidence readiness and clearly hypothetical sustainability scenarios.
 
 ## Run the frontend
 
@@ -61,7 +74,7 @@ Set `VITE_API_BASE_URL=http://localhost:8000` in a local `.env` file to connect 
 
 - Included plant profiles and specimen records are starter demonstrations, not a complete flora or verified voucher collection.
 - The Indian Virtual Herbarium is an institutional reference entry point; HERBARIUM does not claim to have bulk-imported its specimen data.
-- Geographic labels are broad context only, not precise occurrence coordinates.
+- Phase 4 maps only the coordinate-backed GBIF records fetched for the current page; records without coordinates are omitted from maps when the georeferenced-only filter is active.\n- Regional facets and timelines describe the returned GBIF index, not a complete census of biodiversity or population abundance.\n- Phase 4 does not calculate extinction risk, assign IUCN categories, infer climate impacts, authenticate specimen vouchers or predict sustainability outcomes. Those require separate authoritative data and methods.\n- The sustainability slider is a transparent arithmetic scenario over the indexed count, not a forecast.
 - Document extraction is an explainable lexicon-and-pattern baseline, not a trained multilingual model.
 - Scanned-image OCR is not included. PDFs need selectable text.
 - Citation, timeline and summary outputs are candidates and require human review.
