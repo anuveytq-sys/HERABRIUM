@@ -4,7 +4,7 @@ import OccurrenceGlobe from "./OccurrenceGlobe";
 import { requestResearch, ResearchBridgeResults, type ResearchBridgeResult } from "./ResearchBridgePanel";
 
 type Environment = { id: string; name: string; eyebrow: string; description: string; purpose: string };
-type Taxon = { key: number; scientificName: string; canonicalName?: string; rank?: string; status?: string; confidence?: number; kingdom?: string; phylum?: string; order?: string; family?: string; genus?: string; acceptedUsageKey?: number };
+type Taxon = { key: number; usageKey?: number; scientificName: string; canonicalName?: string; rank?: string; status?: string; confidence?: number; kingdom?: string; phylum?: string; order?: string; family?: string; genus?: string; acceptedUsageKey?: number };
 type Occurrence = { key: number; scientificName?: string; country?: string; countryCode?: string; stateProvince?: string; locality?: string; eventDate?: string; year?: number; basisOfRecord?: string; datasetName?: string; datasetKey?: string; institutionCode?: string; collectionCode?: string; catalogNumber?: string; recordedBy?: string; decimalLatitude?: number; decimalLongitude?: number; coordinateUncertaintyInMeters?: number; issues?: string[]; references?: string; taxonKey?: number; habitat?: string; occurrenceRemarks?: string; establishmentMeans?: string; iucnRedListCategory?: string };
 type Result = { taxon: Taxon; count: number; occurrences: Occurrence[]; source: string };
 const environments: Environment[] = [
@@ -17,6 +17,9 @@ const environments: Environment[] = [
  {id:"sustainability",name:"Sustainability Simulator",eyebrow:"07 / SCENARIO WORKSPACE",description:"Model transparent, hypothetical changes to the observed record sample without predicting real-world outcomes.",purpose:"Scenario modelling"}
 ];
 const API="https://api.gbif.org/v1";
+function normaliseTaxon(payload: Taxon & { usageKey?: number }): Taxon {
+ return { ...payload, key: payload.key ?? payload.usageKey ?? payload.acceptedUsageKey ?? 0 };
+}
 const styles = `
 .b4{color:#dcebe2;background:linear-gradient(145deg,#07130f,#0b1d16);border:1px solid #234536;border-radius:20px;padding:clamp(14px,2.5vw,24px);overflow:hidden}
 .b4 *{box-sizing:border-box}.b4 button,.b4 input,.b4 select{font:inherit}.b4 button{cursor:pointer}.b4muted{color:#91aa9b;font-size:11px;letter-spacing:.09em}.b4head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}.b4head h3{font-size:clamp(23px,3vw,34px);margin:8px 0}.b4head p{color:#9db5a6;max-width:720px;line-height:1.65;margin:0}.b4badge{border:1px solid #3b7656;color:#a8d5b5;padding:8px 11px;border-radius:30px;font-size:10px;letter-spacing:.1em;white-space:nowrap}.b4grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:20px 0}.b4card{border:1px solid #234536;background:#0c1b16;border-radius:13px;padding:14px;text-align:left;color:#dcebe2;min-height:136px;transition:transform .2s,border-color .2s,background .2s}.b4card:hover,.b4card.active{transform:translateY(-2px);border-color:#78b58b;background:#10271d}.b4card strong{display:block;font-size:14px;margin:9px 0 6px}.b4card p{font-size:12px;color:#9db5a6;line-height:1.5;margin:0}.b4card span{font-size:9px;letter-spacing:.1em;color:#83bd96}.b4controls{display:grid;grid-template-columns:minmax(200px,1fr) 145px 145px 150px auto;gap:8px;align-items:end;border:1px solid #234536;background:#0a1913;border-radius:14px;padding:12px}.b4field label{display:block;color:#91aa9b;font-size:10px;letter-spacing:.1em;margin:0 0 6px}.b4field input,.b4field select{width:100%;min-width:0;background:#10271d;color:#e5f2e9;border:1px solid #355b45;border-radius:8px;padding:11px;outline:none}.b4field input:focus,.b4field select:focus{border-color:#90c6a0}.b4btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #527e61;background:#173a29;color:#e5f2e9;border-radius:9px;padding:11px 13px;font-size:12px}.b4btn:disabled{opacity:.55;cursor:wait}.b4stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:12px 0}.b4stat{background:#0c1b16;border:1px solid #234536;border-radius:12px;padding:13px}.b4stat b{display:block;font-size:22px}.b4stat span{color:#91aa9b;font-size:9px;letter-spacing:.09em}.b4layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.8fr);gap:12px;margin-top:12px}.b4panel{background:#0c1b16;border:1px solid #234536;border-radius:14px;padding:14px;min-width:0}.b4panel h4{font-size:13px;margin:0 0 10px}.b4map{width:100%;height:auto;display:block;background:radial-gradient(ellipse at center,#102b20,#091711 72%);border-radius:10px}.b4map text{fill:#70917e;font-size:8px;letter-spacing:1px}.b4timeline{display:flex;align-items:end;gap:4px;height:100px;margin-top:10px}.b4bar{flex:1;min-width:4px;background:linear-gradient(0deg,#4e9c6a,#a5d8ad);border-radius:3px 3px 0 0;position:relative}.b4bar span{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:8px;color:#91aa9b}.b4records{margin-top:12px}.b4record{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;padding:12px 0;border-top:1px solid #234536;align-items:start}.b4record>span{font-size:10px;color:#83bd96}.b4record h5{font-size:12px;margin:0 0 5px}.b4record p{font-size:11px;color:#9db5a6;margin:0 0 5px;line-height:1.5}.b4record a{color:#a8d5b5}.b4notice{display:flex;gap:9px;align-items:flex-start;border:1px solid #385a46;background:#10271d;padding:12px;border-radius:10px;color:#a9c2b1;font-size:11px;line-height:1.55;margin-top:12px}.b4error{border-color:#8b5b43;color:#ffc4a3}.b4tax{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}.b4tax div{padding:9px;border-bottom:1px solid #234536}.b4tax small{display:block;color:#91aa9b;font-size:9px;letter-spacing:.1em}.b4tax b{font-size:12px;word-break:break-word}.b4footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#799987;font-size:9px;letter-spacing:.1em;margin-top:18px}
@@ -87,7 +90,7 @@ export default function ResearchEnvironments({onClose}:{onClose:()=>void}){
     if(bridge&&applyBridgeFallback(bridge))return;
     throw new Error("GBIF taxonomy service is temporarily unavailable ("+matchRes.status+").");
    }
-   const match=await matchRes.json() as Taxon;
+   const match=normaliseTaxon(await matchRes.json() as Taxon & {usageKey?:number});
    if(!match.scientificName||!match.key){
     const bridge=await bridgePromise;
     if(bridge&&applyBridgeFallback(bridge))return;
@@ -96,7 +99,7 @@ export default function ResearchEnvironments({onClose}:{onClose:()=>void}){
    let taxon=match;
    if(match.acceptedUsageKey&&match.status==="SYNONYM"){
     const accepted=await fetch(API+"/species/"+match.acceptedUsageKey);
-    if(accepted.ok)taxon=await accepted.json();
+    if(accepted.ok)taxon=normaliseTaxon(await accepted.json() as Taxon & {usageKey?:number});
    }
    const params=new URLSearchParams({taxonKey:String(taxon.key),limit:"100",offset:String(nextOffset),orderBy:"eventDate",order:"DESC"});
    if(onlyCoordinates)params.set("hasCoordinate","true");
@@ -135,7 +138,7 @@ export default function ResearchEnvironments({onClose}:{onClose:()=>void}){
  }
  async function compareTaxa(){
   const names=compareQuery.split(",").map(x=>normaliseQuery(x)).filter(Boolean).slice(0,3);if(!names.length){setError("Enter up to three taxon names separated by commas.");return;}
-  setBusy(true);setError("");try{const rows=await Promise.all(names.map(async name=>{const m=await fetch(API+"/species/match?name="+encodeURIComponent(name));if(!m.ok)throw new Error("GBIF taxonomy lookup failed for "+name);let t=await m.json() as Taxon;if(t.acceptedUsageKey&&t.status==="SYNONYM"){const a=await fetch(API+"/species/"+t.acceptedUsageKey);if(a.ok)t=await a.json();}const r=await fetch(API+"/occurrence/search?taxonKey="+t.key+"&limit=0");if(!r.ok)throw new Error("Occurrence count unavailable for "+name);const d=await r.json();return {name:t.scientificName||name,rank:t.rank||"Unknown rank",count:Number(d.count||0)};}));setComparison(rows);}catch(e){setError(e instanceof Error?e.message:"Taxon comparison failed.");}finally{setBusy(false);}
+  setBusy(true);setError("");try{const rows=await Promise.all(names.map(async name=>{const m=await fetch(API+"/species/match?name="+encodeURIComponent(name));if(!m.ok)throw new Error("GBIF taxonomy lookup failed for "+name);let t=normaliseTaxon(await m.json() as Taxon & {usageKey?:number});if(t.acceptedUsageKey&&t.status==="SYNONYM"){const a=await fetch(API+"/species/"+t.acceptedUsageKey);if(a.ok)t=await a.json();}const r=await fetch(API+"/occurrence/search?taxonKey="+t.key+"&limit=0");if(!r.ok)throw new Error("Occurrence count unavailable for "+name);const d=await r.json();return {name:t.scientificName||name,rank:t.rank||"Unknown rank",count:Number(d.count||0)};}));setComparison(rows);}catch(e){setError(e instanceof Error?e.message:"Taxon comparison failed.");}finally{setBusy(false);}
  }
  function download(kind:"csv"|"geojson"){
   if(!result)return;
