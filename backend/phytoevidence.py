@@ -59,6 +59,10 @@ def _classify(title: str, abstract: str, work_type: str) -> str:
             return label
     return "Scholarly record — type not classified"
 
+@router.get("/health")
+def health() -> dict[str, str]:
+    return {"service": "herabrium-phytoevidence", "status": "ready", "source": "OpenAlex"}
+
 @router.post("/search")
 def search_evidence(body: EvidenceQuery) -> dict[str, Any]:
     query = re.sub(r"\s+", " ", body.query).strip()
