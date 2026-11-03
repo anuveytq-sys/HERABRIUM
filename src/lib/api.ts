@@ -56,3 +56,7 @@ export async function compareEthnoDocuments(files:File[],region:string):Promise<
   if(!response.ok)throw new Error(await response.text()||"Comparison failed.");
   return response.json();
 }
+
+export type PhytoCompound = {id:string;name:string;formula:string;mass:number;plant:string;synonyms:string[];smiles:string;class:string;logp:number;hbd:number;hba:number;tpsa:number;source:string;pm:string;note:string;prediction_status:string;evidence_status:string};
+export async function getPhytoCatalog():Promise<{compounds:PhytoCompound[];plants:string[];disclaimer:string}>{const r=await fetch(API_BASE+"/api/v1/phytochem/catalog");if(!r.ok)throw new Error("PhytoChem catalogue could not be loaded.");return r.json();}
+export async function comparePhytoCompounds(compound_ids:string[]):Promise<any>{const r=await fetch(API_BASE+"/api/v1/phytochem/compare",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({compound_ids})});if(!r.ok)throw new Error(await r.text()||"Comparison failed.");return r.json();}
