@@ -8,6 +8,7 @@ import UploadLab from "./components/UploadLab";
 import EthnoKnowledgeLab from "./components/EthnoKnowledgeLab";
 import PhytoChemLab from "./components/PhytoChemLab";
 import ResearchEnvironments from "./components/ResearchEnvironments";
+import ResearchBridgePanel from "./components/ResearchBridgePanel";
 import { demoStats, plants, researchGaps, type PlantRecord, type SourceRecord } from "./data";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -105,6 +106,7 @@ export default function App() {
             <div className="profile-sources"><div><span className="eyebrow">SOURCE REGISTER / {sourceCount.toString().padStart(2, "0")}</span><span className="tiny-note">Discovery links, not validated findings</span></div>{selectedPlant.sources.map((source) => <button key={source.id} onClick={() => setActiveSource(source)}><span><Database size={14}/>{source.publisher}</span><ArrowUpRight size={15}/></button>)}</div>
           </div>
         </div>
+        <ResearchBridgePanel section="intelligence" title="Research beyond the starter catalogue" description="Search public taxonomy, biodiversity and publication sources when a species or topic is not among the starter records." />
       </section>
 
       <section className="ethno-section section-pad" id="ethno">
@@ -120,6 +122,7 @@ export default function App() {
         <div className="section-heading reveal"><div><span className="eyebrow">SOURCE-LINKED RELATIONSHIPS</span><h2>See the science<br/><em>between the lines.</em></h2></div><p>Explore a transparent relationship map for the selected species. Select a node to inspect what the connection means and what still needs verification.</p></div>
         <div className="graph-toolbar reveal"><div><Network size={16}/><span>LIVE GRAPH / {selectedPlant.commonName.toUpperCase()}</span></div><span>SELECT ANY NODE TO INSPECT</span></div>
         <div className="reveal"><KnowledgeGraph plant={selectedPlant}/></div>
+        <ResearchBridgePanel section="graph" title="Discover source-linked relationships" description="Search a taxon or ecological topic to retrieve related taxonomy, occurrence evidence, structured entities and publication leads." />
         <div className="graph-footnote"><CircleHelp size={15}/> Relationships in this starter graph are exploratory links. Validate each taxonomy and provenance relationship against institutional sources before scientific use.</div>
       </section>
 
@@ -127,12 +130,14 @@ export default function App() {
         <div className="section-index reveal"><span>04</span><i/> BOTANICAL DATA QUALITY</div>
         <div className="section-heading reveal"><div><span className="eyebrow">NOT JUST WHAT WE KNOW</span><h2>Make the missing<br/><em>visible.</em></h2></div><p>Gap cards are generated from the completeness and provenance state of the current starter dataset. They are actionable data-quality findings, not claims about the global state of science.</p></div>
         <div className="gap-grid">{researchGaps.map((gap, index) => <article className="gap-card reveal" key={gap.title}><div className="gap-top"><span>GAP / 0{index + 1}</span><span className="gap-severity">{gap.severity}</span></div><div className="gap-icon">{[<Globe2/>, <BookOpen/>, <FileSearch/>, <Leaf/>][index]}</div><h3>{gap.title}</h3><p>{gap.detail}</p><div className="gap-track">{gap.track}<ArrowUpRight size={14}/></div></article>)}</div>
+        <ResearchBridgePanel section="gaps" title="Investigate a data gap" description="Look up a species, place or ecological theme and inspect which public records and metadata are available or missing." />
       </section>
 
       <section className="laboratory-section section-pad" id="laboratory">
         <div className="section-index reveal"><span>05</span><i/> DOCUMENT INTELLIGENCE LAB</div>
         <div className="section-heading reveal"><div><span className="eyebrow">EXPLAINABLE NLP BASELINE</span><h2>From documents<br/>to <em>data points.</em></h2></div><p>Extract candidate entities while retaining context. This first version is deliberately review-first: automated matches are not accepted as verified facts.</p></div>
         <div className="reveal"><UploadLab/></div>
+        <ResearchBridgePanel section="documents" title="Research a document topic" description="Search the public research network for a topic found in your uploaded documents. Publication results are discovery candidates, not verified claims." />
       </section>
 
       <section className="ethics-section section-pad">
