@@ -32,7 +32,7 @@ export const plants: PlantRecord[] = [
     family: "Zingiberaceae",
     summary: "A rhizomatous species with botanical literature and herbarium records. This starter profile is illustrative and requires specimen-level verification.",
     tags: ["Rhizome", "South Asian research", "Botanical collection"],
-    compounds: ["Curcumin", "Demethoxycurcumin", "Bisdemethoxycurcumin"],
+    specimens: ["Curcumin", "Demethoxycurcumin", "Bisdemethoxycurcumin"],
     traditionalKnowledge: ["Traditional-use documentation should be attached to a specific publication or community-authorised record before being treated as verified."],
     researchTopics: ["Plant morphology", "Botanical identity", "Literature mapping"],
     sources: [
@@ -48,7 +48,7 @@ export const plants: PlantRecord[] = [
     family: "Meliaceae",
     summary: "A widely documented tree species. HERBARIUM keeps botanical identity, literature discovery and any evidence interpretation separate.",
     tags: ["Tree", "Botanical literature", "Biodiversity"],
-    compounds: ["Azadirachtin", "Nimbin", "Nimbolide"],
+    specimens: ["Azadirachtin", "Nimbin", "Nimbolide"],
     traditionalKnowledge: ["Traditional-use records require source attribution, cultural context and appropriate permissions."],
     researchTopics: ["Botanical documentation", "Botanical literature", "Species distribution"],
     sources: [
@@ -64,7 +64,7 @@ export const plants: PlantRecord[] = [
     family: "Lamiaceae",
     summary: "A plant with botanical and herbarium literature that can be explored through source-linked records. The current profile is an illustrative starting point.",
     tags: ["Aromatic herb", "Literature mapping", "South Asia"],
-    compounds: ["Eugenol", "Ursolic acid", "Rosmarinic acid"],
+    specimens: ["Eugenol", "Ursolic acid", "Rosmarinic acid"],
     traditionalKnowledge: ["Documented cultural and traditional records must retain their original source and community context."],
     researchTopics: ["Plant morphology", "Taxonomy", "Ethnobotanical literature"],
     sources: [
