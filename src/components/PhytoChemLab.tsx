@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { Atom, ArrowDownToLine, BookOpen, ChevronRight, ExternalLink, FlaskConical, GitCompareArrows, Leaf, LoaderCircle, Network, Search, ShieldCheck, SlidersHorizontal, Sparkles } from "lucide-react";
+import { Atom, ArrowDownToLine, BookOpen, ChevronRight, ExternalLink, GitCompareArrows, Leaf, LoaderCircle, Network, Search, ShieldCheck } from "lucide-react";
 import { getPhytoCatalog, comparePhytoCompounds, type PhytoCompound } from "../lib/api";
 
 function MoleculeView({ compound }: { compound: PhytoCompound }) {
