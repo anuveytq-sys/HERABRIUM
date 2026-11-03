@@ -6,6 +6,7 @@ import Globe from "./components/Globe";
 import KnowledgeGraph from "./components/KnowledgeGraph";
 import UploadLab from "./components/UploadLab";
 import EthnoKnowledgeLab from "./components/EthnoKnowledgeLab";
+import PhytoChemLab from "./components/PhytoChemLab";
 import { demoStats, plants, researchGaps, type PlantRecord, type SourceRecord } from "./data";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -55,7 +56,7 @@ export default function App() {
     <header className="topbar">
       <a className="brand" href="#home" aria-label="HERBARIUM home"><span className="brand-mark"><Leaf size={19}/></span><span>HERBARIUM<small>INTELLIGENCE NETWORK</small></span></a>
       <nav className={menuOpen ? "nav-links open" : "nav-links"}>
-        <button onClick={() => navigate("intelligence")}>Intelligence</button><button onClick={() => navigate("ethno")}>EthnoKnowledge AI</button><button onClick={() => navigate("graph")}>Knowledge graph</button><button onClick={() => navigate("research")}>Research gaps</button><button onClick={() => navigate("laboratory")}>Document lab</button>
+        <button onClick={() => navigate("intelligence")}>Intelligence</button><button onClick={() => navigate("ethno")}>EthnoKnowledge AI</button><button onClick={() => navigate("phytochem")}>PhytoChem</button><button onClick={() => navigate("graph")}>Knowledge graph</button><button onClick={() => navigate("research")}>Research gaps</button><button onClick={() => navigate("laboratory")}>Document lab</button>
       </nav>
       <div className="topbar-right"><span className="system-status"><i/> SYSTEM {apiOnline ? "CONNECTED" : "LOCAL DEMO"}</span><button className="icon-button mobile-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">{menuOpen ? <X/> : <Menu/>}</button><button className="button button-outline header-cta" onClick={() => navigate("intelligence")}>Explore network <ArrowUpRight size={15}/></button></div>
     </header>
@@ -109,6 +110,8 @@ export default function App() {
         <div className="section-heading reveal"><div><span className="eyebrow">HISTORICAL KNOWLEDGE MINING</span><h2>Decode the archive.<br/><em>Preserve its context.</em></h2></div><p>Multilingual plant-name discovery, historical terminology, citation and timeline extraction, cross-publication comparison and permission-aware stewardship.</p></div>
         <div className="reveal"><EthnoKnowledgeLab/></div>
       </section>
+
+      <section className="phytochem-section section-pad" id="phytochem"><div className="section-index reveal"><span>03</span><i/> PHYTOCHEM / NATURAL PRODUCTS INTELLIGENCE</div><div className="section-heading reveal"><div><span className="eyebrow">PLANT–COMPOUND DISCOVERY</span><h2>Enter the <em>molecular world.</em></h2></div><p>Connect botanical records to chemical identities, inspect interactive 3D molecular topology, compare descriptors and run reproducible discovery screens.</p></div><div className="reveal"><PhytoChemLab/></div></section>
 
       <section className="graph-section section-pad" id="graph">
         <div className="section-index reveal"><span>03</span><i/> RELATIONSHIP INTELLIGENCE</div>
