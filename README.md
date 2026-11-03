@@ -82,4 +82,7 @@ React, TypeScript, Vite, Three.js, GSAP, FastAPI and PyMuPDF. Core frontend oper
 
 ## Deployment
 
+**Live website:** https://herbarium-intelligence.vercel.app
+
+
 Vercel builds the frontend from the repository root using `npm run build` and publishes `dist/`. The FastAPI service requires a Python-compatible deployment target.
