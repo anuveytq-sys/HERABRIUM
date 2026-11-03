@@ -31,7 +31,7 @@ export default function App() {
 
   useEffect(() => {
     let alive = true;
-    const base = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "https://herbarium-api.vercel.app";
+    const base = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "";
     if (base) fetch(base + "/health").then((r) => { if (alive) setApiOnline(r.ok); }).catch(() => { if (alive) setApiOnline(false); });
     const ctx = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>(".reveal").forEach((element) => {
