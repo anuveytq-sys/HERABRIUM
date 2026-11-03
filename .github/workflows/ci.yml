@@ -33,4 +33,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r backend/requirements.txt
-      - run: python -m py_compile backend/main.py backend/ethnoknowledge.py
+      - run: python -m py_compile backend/main.py backend/ethnoknowledge.py backend/research_bridge.py
