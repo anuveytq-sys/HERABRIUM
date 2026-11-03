@@ -6,6 +6,7 @@ on:
     paths:
       - "backend/research_bridge.py"
       - "src/components/ResearchBridgePanel.tsx"
+      - "src/components/Phase4BiodiversityExplorer.tsx"
       - "vercel.json"
       - ".github/workflows/research-bridge-live-smoke.yml"
   workflow_dispatch:
@@ -30,6 +31,10 @@ jobs:
           done
           echo "Updated production bridge did not become available."
           exit 1
+
+          
+      - name: Allow the production deployment to finish propagating
+        run: sleep 45
 
       - name: Submit a real production research query
         env:
