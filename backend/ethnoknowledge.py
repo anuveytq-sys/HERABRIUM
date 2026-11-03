@@ -29,7 +29,6 @@ PLANT_LEXICON: dict[str, dict[str, Any]] = {
     "Tinospora cordifolia": {"family":"Menispermaceae","aliases":{
         "en":["giloy","guduchi"],"hi":["गिलोय","गुडूची"],"sa":["गुडूची"],"bn":["গুলঞ্চ"],"ta":["சீந்தில்"],"te":["తిప్పతీగ"],"mr":["गुळवेल"],"historical":["guduchi","amrita","giloya"]}},
 }
-COMPOUNDS = ["curcumin","azadirachtin","nimbin","nimbolide","eugenol","ursolic acid","rosmarinic acid","withaferin A","withanolide"]
 REGIONS = [
  {"region":"South Asia","languages":["Hindi","Sanskrit","Bengali","Tamil","Telugu","Marathi"],"plants":["Curcuma longa","Azadirachta indica","Ocimum tenuiflorum","Withania somnifera"],"note":"Illustrative discovery grouping; not a claim of exclusive origin or uniform community practice."},
  {"region":"East Asia","languages":["Chinese","Japanese","Korean"],"plants":[],"note":"Expansion-ready region. No records are asserted until sourced and reviewed."},
@@ -116,7 +115,7 @@ def _analyze(filename: str, data: bytes, region: str = "Unspecified") -> dict[st
     citations=_citations(text)
     years=_timeline(text)
     sentences=_sentences(text)
-    ranked=sorted(sentences,key=lambda s:(sum(1 for p in plants if p["scientific_name"].casefold() in s.casefold() or any(m["matched_term"].casefold() in s.casefold() for m in p["mentions"])) * 3 + sum(1 for c in COMPOUNDS if c.casefold() in s.casefold()),-len(s)),reverse=True)
+    ranked=sorted(sentences,key=lambda s:(sum(1 for p in plants if p["scientific_name"].casefold() in s.casefold() or any(m["matched_term"].casefold() in s.casefold() for m in p["mentions"])) * 3,-len(s)),reverse=True)
     summary=ranked[:4]
     classifications=[]
     low=text.casefold()
@@ -125,7 +124,6 @@ def _analyze(filename: str, data: bytes, region: str = "Unspecified") -> dict[st
       "Food and culinary documentation":["food","culinary","spice","diet","recipe"],
       "Agricultural and ecological use":["agriculture","pest","soil","crop","ecology"],
       "Cultural and ceremonial documentation":["ceremon","ritual","festival","sacred","worship"],
-      "Phytochemical research context":["phytochemical","compound","extract","chromatography","curcumin"],
     }.items():
         if any(term in low for term in terms): classifications.append(topic)
     missing=[]
@@ -144,7 +142,7 @@ def _analyze(filename: str, data: bytes, region: str = "Unspecified") -> dict[st
     return {
       "document_name":filename,"region_context":region,"processed_at":datetime.now(timezone.utc).isoformat(),
       "classification":classifications or ["Unclassified — manual review required"],
-      "plant_entities":plants,"compound_mentions":[{"name":c,"status":"text mention only"} for c in COMPOUNDS if re.search(re.escape(c),text,re.I)],
+      "plant_entities":plants,
       "citations":citations,"timeline":years,"summary_candidates":summary,
       "table_extraction":{"tables_detected":sum(len(p["tables"]) for p in pages),"tables":[{"page":p["page"],"rows":t[:30]} for p in pages for t in p["tables"][:4]]},
       "source_quality":_quality(filename,text,citations),"missing_attribution_warnings":missing,
