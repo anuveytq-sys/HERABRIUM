@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { ArrowUpRight, LoaderCircle, Search, ShieldCheck } from "lucide-react";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "";
+// Production API calls must stay on the same Vercel origin as the deployed
+// FastAPI function. A stale VITE_API_BASE_URL (for example localhost) must
+// never send production searches to a developer machine.
+const API_BASE = import.meta.env.DEV
+  ? (import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "")
+  : "";
 
 export type ResearchBridgeResult = {
   schema_version: string;
@@ -62,12 +67,27 @@ export type ResearchBridgeResult = {
 };
 
 export async function requestResearch(query: string, section: string): Promise<ResearchBridgeResult> {
-  const response = await fetch(API_BASE + "/api/v1/research/query", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query: query.trim(), section }),
-    signal: AbortSignal.timeout(30000),
-  });
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 28000);
+  let response: Response;
+  try {
+    response = await fetch(API_BASE + "/api/v1/research/query", {
+      method: "POST",
+      mode: "same-origin",
+      credentials: "same-origin",
+      cache: "no-store",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ query: query.trim(), section }),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new Error("The research service took too long to respond. Please retry.");
+    }
+    throw new Error("Could not connect to the HERABRIUM research service on this website. Check your connection and retry.");
+  } finally {
+    window.clearTimeout(timeout);
+  }
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     const detail = payload?.detail || payload?.message || "The research bridge could not complete this query.";
