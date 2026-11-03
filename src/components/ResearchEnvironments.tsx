@@ -71,7 +71,7 @@ const taskPlans:Record<string,{task:string;terms:string;hint:string}>={
 const envs:Env[]=raw.map(x=>({id:x[0],name:x[1],track:x[2],mode:x[3],desc:x[4],task:taskPlans[x[0]].task,features:[taskPlans[x[0]].task,"Task-specific search strategy","Original source-linked records","Visible uncertainty and missing data"]}));
 type RecordItem={title:string;sub:string;detail:string;url:string;id:string};
 async function queryData(e:Env,q:string):Promise<{items:RecordItem[];summary:string;source:string}>{
- if(!q.trim())throw new Error("Enter a plant, compound or research topic.");
+ if(!q.trim())throw new Error("Enter a search term for this environment’s specific task.");\n const plan=taskPlans[e.id];\n const scopedQuery=plan.terms ? plan.terms+" ("+q+")" : q;
  if(e.mode==="gbif"){
   const a=await fetch("https://api.gbif.org/v1/species/match?name="+encodeURIComponent(q));if(!a.ok)throw new Error("GBIF taxonomic service unavailable.");
   const t=await a.json();if(!t.scientificName)throw new Error("No GBIF taxonomic match. Try the accepted scientific name.");
@@ -104,7 +104,7 @@ async function queryData(e:Env,q:string):Promise<{items:RecordItem[];summary:str
  const r=await fetch("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term="+encodeURIComponent(scopedQuery)+"&retmode=json&retmax=8");if(!r.ok)throw new Error("NCBI PubMed search unavailable.");
  const d=await r.json();const ids=d.esearchresult?.idlist||[];if(!ids.length)return {items:[],summary:"No indexed records found. Try a broader phrase or scientific synonym.",source:"NCBI E-utilities / PubMed"};
  const s=await fetch("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id="+ids.join(",")+"&retmode=json");if(!s.ok)throw new Error("PubMed metadata retrieval failed.");const z=await s.json();
- const records=ids.map((id:string)=>{const p=z.result?.[id]||{};return {title:p.title||"Untitled indexed record",sub:[p.pubdate,p.fulljournalname].filter(Boolean).join(" · "),detail:(p.authors||[]).slice(0,4).map((a:any)=>a.name).join(", ")||"Author metadata unavailable",url:"https://pubmed.ncbi.nlm.nih.gov/"+id+"/",id:"PMID "+id};});
+ const records:RecordItem[]=ids.map((id:string)=>{const p=z.result?.[id]||{};return {title:p.title||"Untitled indexed record",sub:[p.pubdate,p.fulljournalname].filter(Boolean).join(" · "),detail:(p.authors||[]).slice(0,4).map((a:any)=>a.name).join(", ")||"Author metadata unavailable",url:"https://pubmed.ncbi.nlm.nih.gov/"+id+"/",id:"PMID "+id};});
  const dated=records.map(x=>({year:Number((x.sub.match(/\b(19|20)\d{2}\b/)||[])[0]||0),journal:x.sub.split(" · ").slice(1).join(" · ")}));
  const journals=new Set(dated.map(x=>x.journal).filter(Boolean));
  const metadataComplete=records.filter(x=>x.title&&x.sub&&x.detail!=="Author metadata unavailable").length;
