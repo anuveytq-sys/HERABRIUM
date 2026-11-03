@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Activity, AlertTriangle, Atom, CheckCircle2, ChevronRight, ExternalLink, Globe2, Leaf, LoaderCircle, Network, Search, ShieldCheck, Sparkles, X } from "lucide-react";
+import { Activity, AlertTriangle, Atom, CheckCircle2, Dna, ChevronRight, ExternalLink, Globe2, Leaf, LoaderCircle, Network, Search, ShieldCheck, Sparkles, X } from "lucide-react";
 type Mode="gbif"|"pubmed"|"pubchem"|"trials";
 type Env={id:string;name:string;track:string;mode:Mode;desc:string;features:string[]};
 const raw:[string,string,string,Mode,string][]=[
