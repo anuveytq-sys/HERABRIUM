@@ -316,6 +316,11 @@ def _section_insights(section: str, taxon: dict[str, Any] | None, occurrence_dat
     return insights
 
 
+@router.get("/health")
+def research_bridge_health() -> dict[str, str]:
+    return {"service": "herabrium-research-bridge", "bridge": "ready", "version": "1"}
+
+
 @router.post("/query")
 async def research_query(payload: ResearchQuery, request: Request) -> dict[str, Any]:
     query = _clean_query(payload.query)
