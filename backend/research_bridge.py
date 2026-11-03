@@ -128,15 +128,20 @@ def _gbif_taxon(query: str) -> dict[str, Any] | None:
     candidate = KNOWN_NAMES.get(query.casefold(), query)
     url = "https://api.gbif.org/v1/species/match?" + urlencode({"name": candidate, "strict": "false"})
     payload = _get_json(url)
-    if not payload.get("key") or not payload.get("scientificName"):
+    # The GBIF Species Match endpoint returns `usageKey`; the
+    # name-usage endpoint (/species/{key}) returns `key`. Accept both
+    # response shapes so a valid match is not incorrectly treated as missing.
+    matched_key = payload.get("key") or payload.get("usageKey")
+    if not matched_key or not payload.get("scientificName"):
         return None
     if payload.get("status") == "SYNONYM" and payload.get("acceptedUsageKey"):
         accepted = _get_json(f"https://api.gbif.org/v1/species/{int(payload['acceptedUsageKey'])}")
-        if accepted.get("key") and accepted.get("scientificName"):
+        if (accepted.get("key") or accepted.get("usageKey")) and accepted.get("scientificName"):
             payload["matched_as"] = payload.get("scientificName")
             payload = accepted
+    taxon_key = payload.get("key") or payload.get("usageKey") or payload.get("acceptedUsageKey")
     return {
-        "key": payload.get("key"),
+        "key": int(taxon_key),
         "scientific_name": payload.get("scientificName"),
         "canonical_name": payload.get("canonicalName"),
         "rank": payload.get("rank"),
@@ -149,7 +154,7 @@ def _gbif_taxon(query: str) -> dict[str, Any] | None:
         "family": payload.get("family"),
         "genus": payload.get("genus"),
         "accepted_usage_key": payload.get("acceptedUsageKey"),
-        "source_url": f"https://www.gbif.org/species/{payload.get('key')}",
+        "source_url": f"https://www.gbif.org/species/{taxon_key}",
     }
 
 
