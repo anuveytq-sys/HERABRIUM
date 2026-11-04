@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowUpRight, LoaderCircle, Search, ShieldCheck } from "lucide-react";
+import { requestOpenRouterAnswer } from "./openRouter";
+import { ArrowUpRight, LoaderCircle, Search, ShieldCheck, Sparkles } from "lucide-react";
 
 // Production API calls must stay on the same Vercel origin as the deployed
 // FastAPI function. A stale VITE_API_BASE_URL (for example localhost) must
@@ -143,6 +144,9 @@ export default function ResearchBridgePanel({ section, title = "Search the wider
   const [result, setResult] = useState<ResearchBridgeResult | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [aiAnswer, setAiAnswer] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
   async function search() {
     if (query.trim().length < 2) { setError("Enter at least two characters to search."); return; }
     setLoading(true); setError(""); setResult(null);
@@ -166,5 +170,11 @@ export default function ResearchBridgePanel({ section, title = "Search the wider
     <div className="hb-research-form"><input value={query} onChange={event => setQuery(event.target.value)} onKeyDown={event => { if (event.key === "Enter" && !loading) search(); }} placeholder="e.g. Ganga dolphin, neem distribution, mangrove biodiversity…" aria-label="Research query"/><button onClick={search} disabled={loading}>{loading ? <><LoaderCircle className="spin" size={14}/> Searching</> : <><Search size={14}/> Research</>}</button></div>
     {error && <div className="hb-research-error">{error}</div>}
     {result && <ResearchBridgeResults result={result}/>}
+    {(aiLoading || aiAnswer || aiError) && <section className="hb-ai-interpretation" style={{marginTop:12,padding:14,border:"1px solid #5a8b65",borderRadius:11,background:"linear-gradient(145deg,#10271a,#0a1b12)"}}>
+      <div style={{font:"9px ui-monospace,monospace",letterSpacing:".12em",color:"#a7e5b6"}}><Sparkles size={13} style={{verticalAlign:"middle",marginRight:6}}/>HERABRIUM AI / SOURCE-GROUNDED INTERPRETATION</div>
+      {aiLoading&&<p style={{fontSize:11,color:"#a6bdad"}}>Organising retrieved evidence with OpenRouter…</p>}
+      {aiAnswer&&<div style={{whiteSpace:"pre-wrap",fontSize:12,lineHeight:1.75,color:"#e0eee4",marginTop:10}}>{aiAnswer}</div>}
+      {aiError&&<p style={{fontSize:10,color:"#ffc4a3",marginTop:8}}>AI layer unavailable: {aiError} The structured research records above remain available.</p>}
+    </section>}
   </section>;
 }
