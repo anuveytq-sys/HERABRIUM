@@ -23,10 +23,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
       - name: Install and build frontend
         run: |
-          npm ci
+          npm install --no-audit --no-fund
           npm run build
       - name: Verify live Phase 5 API
         env:
@@ -55,10 +54,15 @@ jobs:
           assert isinstance(data.get("works"), list), data
           assert data.get("source") == "OpenAlex public scholarly metadata API", data
           assert isinstance(data.get("warnings"), list) and data["warnings"], data
+          assert data.get("source_status") in {"ready", "temporarily_unavailable"}, data
           assert all("title" in item and "study_type" in item and "url" in item for item in data["works"]), data
-          print("PHYTOEVIDENCE LIVE PASS")
-          print("Matched:", data.get("total_matched"))
-          print("Returned eligible records:", data.get("returned"))
-          print("With abstracts:", data.get("coverage", {}).get("with_abstract"))
-          print("Study categories:", ", ".join(data.get("coverage", {}).get("classified_types", [])))
+          if data["source_status"] == "temporarily_unavailable":
+              print("PHYTOEVIDENCE DEGRADED MODE PASS")
+              print("OpenAlex outage is surfaced without breaking the research workspace.")
+          else:
+              print("PHYTOEVIDENCE LIVE PASS")
+              print("Matched:", data.get("total_matched"))
+              print("Returned eligible records:", data.get("returned"))
+              print("With abstracts:", data.get("coverage", {}).get("with_abstract"))
+              print("Study categories:", ", ".join(data.get("coverage", {}).get("classified_types", [])))
           PY
