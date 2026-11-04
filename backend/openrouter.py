@@ -18,6 +18,10 @@ BLOCKED = re.compile(
 )
 
 
+class TestRequest(BaseModel):
+    model: str = Field(default="openrouter/free", min_length=3, max_length=160)
+
+
 class AnswerRequest(BaseModel):
     query: str = Field(min_length=2, max_length=500)
     section: str = Field(default="general", max_length=80)
@@ -63,15 +67,27 @@ def _validated_key(value: str | None) -> str:
 
 
 @router.post("/test")
-def test_openrouter(x_openrouter_key: str | None = Header(default=None)) -> dict[str, Any]:
+def test_openrouter(
+    body: TestRequest,
+    x_openrouter_key: str | None = Header(default=None),
+) -> dict[str, Any]:
     key = _validated_key(x_openrouter_key)
-    payload = _request(API_ROOT + "/models", key)
-    models = payload.get("data") or []
+    payload = {
+        "model": body.model,
+        "temperature": 0,
+        "max_tokens": 12,
+        "messages": [{"role": "user", "content": "Reply with exactly: HERABRIUM connection verified."}],
+    }
+    result = _request(API_ROOT + "/chat/completions", key, "POST", payload)
+    choices = result.get("choices") or []
+    content = ((choices[0].get("message") or {}).get("content") if choices else None)
+    if not isinstance(content, str) or not content.strip():
+        raise HTTPException(status_code=502, detail="OpenRouter accepted the key but the selected model returned no test response.")
     return {
         "status": "connected",
         "provider": "OpenRouter",
-        "available_models": len(models),
-        "message": "The API key was accepted by OpenRouter.",
+        "model": result.get("model") or body.model,
+        "message": "The API key and selected model passed a live response test.",
     }
 
 
