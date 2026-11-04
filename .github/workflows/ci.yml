@@ -44,7 +44,7 @@ jobs:
           required_nexus = [
               "NEXUS COMMAND",
               "Promise.allSettled",
-              "Occurrence chronology",
+              "OCCURRENCE CHRONOLOGY",
               "Publication stream",
               "PROVENANCE REGISTRY",
               "NEXUS DOSSIER VAULT",
