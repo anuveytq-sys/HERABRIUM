@@ -142,3 +142,7 @@ app.include_router(research_bridge_router)
 from .phytoevidence import router as phytoevidence_router
 
 app.include_router(phytoevidence_router)
+
+from .openrouter import router as openrouter_router
+
+app.include_router(openrouter_router)
