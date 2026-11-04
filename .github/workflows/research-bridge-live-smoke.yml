@@ -119,11 +119,14 @@ jobs:
           assert isinstance(result.get("total_matched"), int), result
           assert isinstance(result.get("warnings"), list), result
           assert result.get("review_required") is True, result
-          assert result.get("source_status") in {"ready", "temporarily_unavailable"}, result
+          assert result.get("source_status") in {"ready", "fallback", "temporarily_unavailable"}, result
           if result["source_status"] == "temporarily_unavailable":
-              print("PHYTOEVIDENCE DEGRADED MODE PASS: source outage is reported without breaking Nexus.")
+              print("PHYTOEVIDENCE DEGRADED MODE PASS: both indexes are unavailable; Nexus remains usable.")
               print("Warnings:", result["warnings"])
+          elif result["source_status"] == "fallback":
+              print("PHYTOEVIDENCE CROSSREF FALLBACK PASS")
+              print("Matched:", result["total_matched"], "| returned:", len(result["works"]))
           else:
-              print("PHYTOEVIDENCE LIVE PASS")
+              print("PHYTOEVIDENCE OPENALEX LIVE PASS")
               print("Matched:", result["total_matched"], "| returned:", len(result["works"]))
           PY
