@@ -34,6 +34,34 @@ jobs:
         run: npm run typecheck
       - name: Vite production build
         run: npm run build
+      - name: Verify Phase 6 Nexus feature contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          nexus = Path("src/components/HerabriumNexus.tsx").read_text()
+          app = Path("src/App.tsx").read_text()
+          required_nexus = [
+              "NEXUS COMMAND",
+              "Promise.allSettled",
+              "Occurrence chronology",
+              "Publication stream",
+              "PROVENANCE REGISTRY",
+              "NEXUS DOSSIER VAULT",
+              "herabrium-nexus-dossiers-v1",
+              "Export JSON",
+              "Export report",
+              "follow-up",
+              "year_from",
+              "open_access_only",
+          ]
+          missing = [feature for feature in required_nexus if feature not in nexus]
+          if missing:
+              raise SystemExit("Missing Nexus feature markers: " + ", ".join(missing))
+          if 'from "./components/HerabriumNexus"' not in app or 'navigate("nexus")' not in app:
+              raise SystemExit("HERABRIUM Nexus is not imported and navigable from App.tsx")
+          print("Phase 6 feature contract passed: multi-domain orchestration, chronology, literature, provenance, dossier vault, notes/status and exports.")
+          PY
 
   api:
     name: Backend syntax and application import
