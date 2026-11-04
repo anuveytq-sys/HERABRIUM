@@ -137,4 +137,8 @@ app.include_router(ethnoknowledge_router)
 from .research_bridge import router as research_bridge_router
 
 app.include_router(research_bridge_router)
-\n\nfrom .phytoevidence import router as phytoevidence_router\n\napp.include_router(phytoevidence_router)\n
+
+
+from .phytoevidence import router as phytoevidence_router
+
+app.include_router(phytoevidence_router)
