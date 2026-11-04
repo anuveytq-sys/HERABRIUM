@@ -79,7 +79,7 @@ def _crossref_fallback(query: str, body: "EvidenceQuery") -> dict[str, Any]:
     for item in message.get("items", []):
         title = ((item.get("title") or [""])[0] or "").strip()
         abstract = re.sub(r"<[^>]+>", " ", item.get("abstract") or "")
-        abstract = re.sub(r"\\s+", " ", abstract).strip()[:2200]
+        abstract = re.sub(r"\s+", " ", abstract).strip()[:2200]
         if not title or BLOCKED.search(title) or (abstract and BLOCKED.search(abstract)):
             continue
         date_parts = ((item.get("published") or {}).get("date-parts") or [[]])[0]
