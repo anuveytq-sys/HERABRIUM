@@ -82,8 +82,31 @@ def search_evidence(body: EvidenceQuery) -> dict[str, Any]:
         params["filter"] = ",".join(filters)
     try:
         payload = _get("https://api.openalex.org/works?" + urlencode(params))
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except RuntimeError:
+        # Keep the research workspace usable when an external index is
+        # temporarily unreachable. Nexus can still show its other four
+        # evidence domains and present this source as explicitly degraded.
+        return {
+            "query": query,
+            "source": "OpenAlex public scholarly metadata API",
+            "source_status": "temporarily_unavailable",
+            "total_matched": 0,
+            "returned": 0,
+            "works": [],
+            "coverage": {
+                "with_abstract": 0,
+                "open_access": 0,
+                "with_year": 0,
+                "year_span": None,
+                "classified_types": [],
+            },
+            "warnings": [
+                "OpenAlex could not be reached during this request. No publication records are being presented; retry the search later.",
+                "This temporary source outage does not affect the separate taxonomy, specimen, occurrence or conservation research domains.",
+                "Publication discovery results require review of the original scholarly records.",
+            ],
+            "review_required": True,
+        }
     works = []
     for item in payload.get("results", []):
         title = (item.get("title") or "").strip()
@@ -112,6 +135,7 @@ def search_evidence(body: EvidenceQuery) -> dict[str, Any]:
     years = [w["year"] for w in works if isinstance(w["year"], int)]
     return {
         "query": query, "source": "OpenAlex public scholarly metadata API",
+        "source_status": "ready",
         "total_matched": payload.get("meta", {}).get("count", len(works)),
         "returned": len(works), "works": works,
         "coverage": {
