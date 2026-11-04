@@ -5,8 +5,13 @@ on:
     branches: [main]
     paths:
       - "backend/research_bridge.py"
+      - "backend/phytoevidence.py"
+      - "backend/main.py"
       - "src/components/ResearchBridgePanel.tsx"
       - "src/components/Phase4BiodiversityExplorer.tsx"
+      - "src/components/PhytoEvidenceLab.tsx"
+      - "src/components/HerabriumNexus.tsx"
+      - "src/App.tsx"
       - "vercel.json"
       - ".github/workflows/research-bridge-live-smoke.yml"
   workflow_dispatch:
@@ -64,4 +69,56 @@ jobs:
           print("Returned occurrence sample:", len(result.get("occurrences", [])))
           print("Related knowledge:", len(result.get("related_knowledge", [])))
           print("Publication candidates:", len(result.get("literature_candidates", [])))
+          PY
+
+      - name: Verify all five Nexus research domains
+        env:
+          BASE_URL: https://herbarium-intelligence.vercel.app
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+
+          base = os.environ["BASE_URL"]
+          for section in ("intelligence", "ethno", "specimen", "biosphere", "conservation"):
+              body = json.dumps({"query": "Neem", "section": section})
+              raw = subprocess.check_output([
+                  "curl", "--fail-with-body", "--silent", "--show-error",
+                  "--max-time", "40", "-X", "POST",
+                  base + "/api/v1/research/query",
+                  "-H", "Content-Type: application/json",
+                  "--data", body
+              ], text=True)
+              result = json.loads(raw)
+              assert result.get("query") == "Neem", (section, result)
+              assert result.get("section") == section, (section, result)
+              assert isinstance(result.get("overview"), str) and result["overview"], (section, result)
+              assert isinstance(result.get("section_insights"), list), (section, result)
+              assert isinstance(result.get("sources"), list), (section, result)
+              print("NEXUS DOMAIN PASS:", section, "| insights:", len(result["section_insights"]), "| sources:", len(result["sources"]))
+          PY
+
+      - name: Verify Phase 5 publication discovery used by Nexus
+        env:
+          BASE_URL: https://herbarium-intelligence.vercel.app
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 40 \
+            -X POST "$BASE_URL/api/v1/phytoevidence/search" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            --data '{"query":"botanical biodiversity survey"}' \
+            -o /tmp/phytoevidence-result.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("/tmp/phytoevidence-result.json").read_text())
+          assert result.get("query") == "botanical biodiversity survey", result
+          assert isinstance(result.get("works"), list), result
+          assert isinstance(result.get("total_matched"), int), result
+          assert isinstance(result.get("warnings"), list), result
+          assert result.get("review_required") is True, result
+          print("PHYTOEVIDENCE LIVE PASS")
+          print("Matched:", result["total_matched"], "| returned:", len(result["works"]))
           PY
