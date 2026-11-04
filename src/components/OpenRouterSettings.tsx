@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, Eye, EyeOff, KeyRound, LoaderCircle, Save, ShieldCheck, Sparkles, X } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, LoaderCircle, Save, ShieldCheck, Sparkles, X } from "lucide-react";
 import { clearOpenRouterConfig, getOpenRouterConfig, saveOpenRouterConfig } from "./openRouter";
 
 export default function OpenRouterSettings({ onClose }: { onClose: () => void }) {
