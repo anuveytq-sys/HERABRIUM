@@ -59,6 +59,11 @@ def _request(url: str, key: str, method: str = "GET", payload: dict[str, Any] | 
         raise HTTPException(status_code=502, detail="Could not reach OpenRouter. Check the connection and retry.") from exc
 
 
+@router.get("/health")
+def openrouter_health() -> dict[str, str]:
+    return {"service": "herabrium-openrouter-proxy", "status": "ready", "credential_storage": "client-side-only"}
+
+
 def _validated_key(value: str | None) -> str:
     key = (value or "").strip()
     if len(key) < 20 or any(char.isspace() for char in key):
