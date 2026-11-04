@@ -58,7 +58,7 @@ export default function HerabriumNexus(){
  const yearCounts=useMemo(()=>{const counts=new Map<number,number>();allOccurrences.forEach(row=>{const y=row.year||(row.event_date?Number(row.event_date.slice(0,4)):NaN);if(Number.isFinite(y)&&y>1700&&y<2101)counts.set(y,(counts.get(y)||0)+1)});return [...counts.entries()].sort((a,b)=>a[0]-b[0]);},[allOccurrences]);
  const sourceLinks=useMemo(()=>{if(!pack)return[];const links=new Map<string,{name:string;url:string;purpose:string}>();Object.values(pack.domains).forEach(r=>r?.sources.forEach(s=>links.set(s.name,s)));return [...links.values()]},[pack]);
  const occurrenceTotal=useMemo(()=>Object.values(pack?.domains||{}).reduce((n,r)=>n+(r?.occurrence_summary.total_indexed_records||0),0),[pack]);
- const saveDossier=()=>{if(!pack)return;const id=crypto.randomUUID();persist([{id,query:pack.query,created:pack.created,note,status:"unreviewed",pack},...dossiers].slice(0,30));setNote("")};
+ const saveDossier=()=>{if(!pack)return;const id=crypto.randomUUID();persist([{id,query:pack.query,created:pack.created,note,status:"unreviewed" as const,pack},...dossiers].slice(0,30));setNote("")};
  const updateStatus=(id:string,status:SavedDossier["status"])=>persist(dossiers.map(d=>d.id===id?{...d,status}:d));
  const deleteDossier=(id:string)=>persist(dossiers.filter(d=>d.id!==id));
  const exportPack=()=>{if(pack)saveFile("herabrium-nexus-"+pack.query.toLowerCase().replace(/[^a-z0-9]+/g,"-")+".json",JSON.stringify(pack,null,2),"application/json")};
