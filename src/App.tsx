@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUpRight, BookOpen, CheckCircle2, ChevronRight, CircleHelp, Database, ExternalLink, FileSearch, Globe2, Leaf, Menu, Network, Search, ShieldCheck, Sparkles, X } from "lucide-react";
+import { ArrowDown, ArrowUpRight, BookOpen, CheckCircle2, ChevronRight, CircleHelp, Database, ExternalLink, FileSearch, Globe2, Leaf, Menu, Network, Search, ShieldCheck, Sparkles, X, KeyRound } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Globe from "./components/Globe";
@@ -11,6 +11,7 @@ import ResearchEnvironments from "./components/ResearchEnvironments";
 import ResearchBridgePanel from "./components/ResearchBridgePanel";
 import PhytoEvidenceLab from "./components/PhytoEvidenceLab";
 import HerabriumNexus from "./components/HerabriumNexus";
+import OpenRouterSettings from "./components/OpenRouterSettings";
 import { demoStats, plants, researchGaps, type PlantRecord, type SourceRecord } from "./data";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -33,6 +34,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [apiOnline, setApiOnline] = useState(false);
   const [hubOpen, setHubOpen] = useState(false);
+  const [openRouterOpen, setOpenRouterOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -63,7 +65,7 @@ export default function App() {
       <nav className={menuOpen ? "nav-links open" : "nav-links"}>
         <button onClick={() => navigate("intelligence")}>Intelligence</button><button onClick={() => navigate("ethno")}>EthnoKnowledge AI</button><button onClick={() => navigate("phytochem")}>Specimen explorer</button><button onClick={() => navigate("graph")}>Knowledge graph</button><button onClick={() => navigate("research")}>Data gaps</button><button onClick={() => navigate("laboratory")}>Document lab</button><button onClick={() => navigate("phytoevidence")}>PhytoEvidence</button><button onClick={() => navigate("nexus")}>HERABRIUM Nexus</button><button className="nav-environments" onClick={() => { setMenuOpen(false); setHubOpen(true); }}>Phase 4 Biodiversity <ArrowUpRight size={13}/></button>
       </nav>
-      <div className="topbar-right"><span className="system-status"><i/> SYSTEM {apiOnline ? "CONNECTED" : "LOCAL DEMO"}</span><button className="icon-button mobile-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation menu">{menuOpen ? <X/> : <Menu/>}</button><button className="button button-outline header-cta" onClick={() => navigate("intelligence")}>Explore network <ArrowUpRight size={15}/></button></div>
+      <div className="topbar-right"><span className="system-status"><i/> SYSTEM {apiOnline ? "CONNECTED" : "LOCAL DEMO"}</span><button className="icon-button" onClick={() => setOpenRouterOpen(true)} aria-label="Open OpenRouter AI settings" title="OpenRouter AI settings"><KeyRound size={17}/></button><button className="icon-button mobile-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation menu">{menuOpen ? <X/> : <Menu/>}</button><button className="button button-outline header-cta" onClick={() => navigate("intelligence")}>Explore network <ArrowUpRight size={15}/></button></div>
     </header>
 
     <main>
@@ -166,6 +168,7 @@ export default function App() {
       </section>
     </main>
     {hubOpen && <ResearchEnvironments onClose={() => setHubOpen(false)} />}
+    {openRouterOpen && <OpenRouterSettings onClose={() => setOpenRouterOpen(false)} />}
     <SourceDrawer source={activeSource} onClose={() => setActiveSource(null)}/>
   </div>;
 }
