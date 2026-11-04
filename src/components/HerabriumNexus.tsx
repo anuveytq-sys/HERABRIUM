@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Activity, Archive, ArrowDownToLine, ArrowUpRight, CheckCircle2, ChevronRight, CircleDot, Database, FileSearch, Globe2, LoaderCircle, Network, Plus, Radar, Search, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
 import { requestResearch, type ResearchBridgeResult } from "./ResearchBridgePanel";
+import { requestOpenRouterAnswer } from "./openRouter";
 
 type Domain = { id:string; label:string; subtitle:string; icon:string };
 type Literature = { id:string; title:string; year?:number; authors:string[]; venue:string; doi?:string; url?:string; open_access:boolean; study_type:string; abstract:string; metadata_type:string; source:string; source_url?:string; limitations:string };
@@ -43,7 +44,7 @@ function saveFile(name:string,data:string,type="text/plain"){const blob=new Blob
 function domainIcon(id:string){if(id==="biosphere")return <Globe2 size={17}/>;if(id==="ethno")return <Archive size={17}/>;if(id==="specimen")return <Database size={17}/>;if(id==="conservation")return <ShieldCheck size={17}/>;return <LeafIcon/>}
 function LeafIcon(){return <CircleDot size={17}/>}
 export default function HerabriumNexus(){
- const [query,setQuery]=useState("");const [loading,setLoading]=useState(false);const [error,setError]=useState("");const [pack,setPack]=useState<EvidencePack|null>(null);const [selectedDomain,setSelectedDomain]=useState("biosphere");const [tab,setTab]=useState<"overview"|"timeline"|"literature">("overview");const [dossiers,setDossiers]=useState<SavedDossier[]>(loadDossiers);const [note,setNote]=useState("");const [openAccess,setOpenAccess]=useState(false);const [yearFrom,setYearFrom]=useState("");const [yearTo,setYearTo]=useState("");
+ const [query,setQuery]=useState("");const [loading,setLoading]=useState(false);const [error,setError]=useState("");const [pack,setPack]=useState<EvidencePack|null>(null);const [selectedDomain,setSelectedDomain]=useState("biosphere");const [tab,setTab]=useState<"overview"|"timeline"|"literature">("overview");const [dossiers,setDossiers]=useState<SavedDossier[]>(loadDossiers);const [note,setNote]=useState("");const [openAccess,setOpenAccess]=useState(false);const [yearFrom,setYearFrom]=useState("");const [yearTo,setYearTo]=useState("");const [aiLoading,setAiLoading]=useState(false);const [aiError,setAiError]=useState("");
  const persist=(next:SavedDossier[])=>{setDossiers(next);localStorage.setItem(STORAGE,JSON.stringify(next))};
  async function runNexus(){const term=query.trim();if(term.length<2){setError("Enter a botanical species, place or biodiversity topic.");return}setLoading(true);setError("");setPack(null);setTab("overview");
   const domainResults=await Promise.allSettled(DOMAINS.map(async d=>[d.id,await requestResearch(term,d.id)] as const));
