@@ -149,9 +149,17 @@ export default function ResearchBridgePanel({ section, title = "Search the wider
   const [aiError, setAiError] = useState("");
   async function search() {
     if (query.trim().length < 2) { setError("Enter at least two characters to search."); return; }
-    setLoading(true); setError(""); setResult(null);
-    try { setResult(await requestResearch(query, section)); }
-    catch (err) { setError(err instanceof Error ? err.message : "Research lookup failed. Please retry."); }
+    setLoading(true); setError(""); setResult(null); setAiAnswer(""); setAiError("");
+    try {
+      const research = await requestResearch(query, section);
+      setResult(research);
+      setAiLoading(true);
+      try {
+        const ai = await requestOpenRouterAnswer(query.trim(), section, research);
+        if (ai) setAiAnswer(ai.answer);
+      } catch (err) { setAiError(err instanceof Error ? err.message : "AI interpretation is temporarily unavailable."); }
+      finally { setAiLoading(false); }
+    } catch (err) { setError(err instanceof Error ? err.message : "Research lookup failed. Please retry."); }
     finally { setLoading(false); }
   }
   return <section className="hb-research-panel">
