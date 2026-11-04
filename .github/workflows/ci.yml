@@ -1,4 +1,4 @@
-name: HERBARIUM CI
+name: HERABRIUM CI
 
 on:
   push:
@@ -7,8 +7,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Keep each main-branch validation run alive; do not cancel a previous
+# successful/active validation just because another commit arrives.
 concurrency:
-  group: herbarium-main-ci
+  group: herabrium-ci-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
@@ -16,21 +18,55 @@ permissions:
 
 jobs:
   frontend:
+    name: Frontend typecheck and production build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - run: npm install
-      - run: npm run typecheck
-      - run: npm run build
+          node-version: 20
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm install --no-audit --no-fund
+      - name: TypeScript validation
+        run: npm run typecheck
+      - name: Vite production build
+        run: npm run build
+
   api:
+    name: Backend syntax and application import
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r backend/requirements.txt
-      - run: python -m py_compile backend/main.py backend/ethnoknowledge.py backend/research_bridge.py
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install backend dependencies
+        run: python -m pip install --disable-pip-version-check -r backend/requirements.txt
+      - name: Compile every backend module
+        run: python -m compileall -q backend
+      - name: Import FastAPI application and verify registered routes
+        run: |
+          python - <<'PY'
+          from backend.main import app
+
+          routes = {getattr(route, "path", "") for route in app.routes}
+          required = {
+              "/health",
+              "/api/v1/research/query",
+              "/api/v1/phytoevidence/health",
+              "/api/v1/phytoevidence/search",
+          }
+          missing = sorted(required - routes)
+          if missing:
+              raise SystemExit("Missing API routes: " + ", ".join(missing))
+          print("Backend import and Phase 1–6 API route registration passed.")
+          PY
