@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { AlertTriangle, ArrowDownToLine, ExternalLink, Globe2, LoaderCircle, Search, ShieldCheck, X } from "lucide-react";
 import OccurrenceGlobe from "./OccurrenceGlobe";
 import { requestResearch, ResearchBridgeResults, type ResearchBridgeResult } from "./ResearchBridgePanel";
+import { requestOpenRouterAnswer } from "./openRouter";
 
 type Environment = { id: string; name: string; eyebrow: string; description: string; purpose: string };
 type Taxon = { key: number; usageKey?: number; scientificName: string; canonicalName?: string; rank?: string; status?: string; confidence?: number; kingdom?: string; phylum?: string; order?: string; family?: string; genus?: string; acceptedUsageKey?: number };
@@ -43,6 +44,7 @@ export default function ResearchEnvironments({onClose}:{onClose:()=>void}){
  const [result,setResult]=useState<Result|null>(null);
  const [bridgeResult,setBridgeResult]=useState<ResearchBridgeResult|null>(null);
  const [bridgeError,setBridgeError]=useState("");
+ const [aiAnswer,setAiAnswer]=useState("");const [aiBusy,setAiBusy]=useState(false);const [aiError,setAiError]=useState("");
  const [offset,setOffset]=useState(0);
  const [scenario,setScenario]=useState(20);
  const [showAll,setShowAll]=useState(false);
@@ -72,10 +74,11 @@ export default function ResearchEnvironments({onClose}:{onClose:()=>void}){
  ];
  async function run(nextOffset=0){
   const term=normaliseQuery(query);if(!term){setError("Enter a plant, animal, fungus or other taxon name, optionally phrased as a distribution question.");return}
-  setBusy(true);setError("");setBridgeError("");setResult(null);setBridgeResult(null);setOffset(nextOffset);
+  setBusy(true);setError("");setBridgeError("");setResult(null);setBridgeResult(null);setOffset(nextOffset);setAiAnswer("");setAiError("");setAiBusy(false);
   const bridgePromise=requestResearch(term,active.id).catch((reason)=>{setBridgeError(reason instanceof Error?reason.message:"The public research bridge is temporarily unavailable.");return null;});
   const applyBridgeFallback=(bridge:ResearchBridgeResult)=>{
-   setBridgeResult(bridge);
+   setBridgeResult(bridge);setAiBusy(true);
+   void requestOpenRouterAnswer(term,active.name,bridge).then(ai=>{if(ai)setAiAnswer(ai.answer);}).catch(e=>setAiError(e instanceof Error?e.message:"AI interpretation is temporarily unavailable.")).finally(()=>setAiBusy(false));
    if(!bridge.taxon?.key||!bridge.taxon.scientific_name)return false;
    const taxon:Taxon={key:bridge.taxon.key,scientificName:bridge.taxon.scientific_name,canonicalName:bridge.taxon.canonical_name,rank:bridge.taxon.rank,status:bridge.taxon.taxonomic_status,confidence:bridge.taxon.confidence,kingdom:bridge.taxon.kingdom,phylum:bridge.taxon.phylum,order:bridge.taxon.order,family:bridge.taxon.family,genus:bridge.taxon.genus};
    const occurrences:Occurrence[]=bridge.occurrences.map((row,index)=>({key:row.occurrence_id||index,scientificName:row.scientific_name,country:row.country,countryCode:row.country_code,stateProvince:row.state_province,locality:row.locality,eventDate:row.event_date,year:row.year,basisOfRecord:row.record_type,datasetName:row.dataset,institutionCode:row.institution,collectionCode:row.collection,catalogNumber:row.catalogue_number,recordedBy:row.recorded_by,decimalLatitude:row.latitude,decimalLongitude:row.longitude,habitat:row.habitat_note,occurrenceRemarks:row.field_note}));
@@ -127,7 +130,8 @@ export default function ResearchEnvironments({onClose}:{onClose:()=>void}){
     else setRegionalRichness(null);
    }else setRegionalRichness(null);
    setResult({taxon,count:Number(payload.count||0),occurrences:rows,source:"GBIF Species API + Occurrence API"});
-   setBridgeResult(await bridgePromise);
+   const bridge=await bridgePromise;setBridgeResult(bridge);
+   if(bridge){setAiBusy(true);try{const ai=await requestOpenRouterAnswer(term,active.name,{taxon,occurrences:rows,occurrence_total:payload.count,bridge});if(ai)setAiAnswer(ai.answer);}catch(e){setAiError(e instanceof Error?e.message:"AI interpretation is temporarily unavailable.");}finally{setAiBusy(false);}}
    setComparison([]);
   }catch(e){
    const bridge=await bridgePromise;
@@ -162,6 +166,7 @@ export default function ResearchEnvironments({onClose}:{onClose:()=>void}){
   </div>
   {bridgeError&&<div className="b4notice b4error"><AlertTriangle size={15}/>{bridgeError} The direct GBIF lookup can still work independently.</div>}
   {bridgeResult&&<ResearchBridgeResults result={bridgeResult}/>}
+  {(aiBusy||aiAnswer||aiError)&&<section style={{marginTop:12,padding:14,border:"1px solid #5a8b65",borderRadius:11,background:"linear-gradient(145deg,#10271a,#0a1b12)",color:"#dcebe2"}}><span className="b4muted">HERABRIUM AI / BIODIVERSITY INTERPRETATION</span>{aiBusy&&<p style={{fontSize:11}}>Organising taxonomy and occurrence evidence…</p>}{aiAnswer&&<div style={{whiteSpace:"pre-wrap",fontSize:12,lineHeight:1.75,marginTop:9}}>{aiAnswer}</div>}{aiError&&<p style={{fontSize:10,color:"#ffc4a3"}}>AI layer unavailable: {aiError}</p>}</section>}
   <div className="b4head" style={{marginTop:10,alignItems:"center"}}><label style={{display:"flex",gap:8,alignItems:"center",fontSize:11,color:"#9db5a6"}}><input type="checkbox" checked={onlyCoordinates} onChange={e=>setOnlyCoordinates(e.target.checked)}/> Require georeferenced records for map analysis</label><span className="b4muted">UP TO 100 RECORDS PER PAGE · PAGINATION ENABLED</span></div>
   {error&&<div className="b4notice b4error"><AlertTriangle size={16}/>{error}</div>}
   {result&&<><div className="b4tax">{[["ACCEPTED NAME",result.taxon.scientificName],["TAXONOMIC RANK",result.taxon.rank||"Not supplied"],["FAMILY",result.taxon.family||"Not supplied"],["MATCH CONFIDENCE",result.taxon.confidence!=null?result.taxon.confidence+" / 100":"Not supplied"],["KINGDOM",result.taxon.kingdom||"Not supplied"],["ORDER",result.taxon.order||"Not supplied"],["GENUS",result.taxon.genus||"Not supplied"],["TAXON STATUS",result.taxon.status||"Not supplied"]].map(x=><div key={x[0]}><small>{x[0]}</small><b>{x[1]}</b></div>)}</div>
