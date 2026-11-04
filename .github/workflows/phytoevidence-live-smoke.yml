@@ -52,15 +52,18 @@ jobs:
               data = json.loads(response.read().decode())
           assert data.get("query") == "mangrove biodiversity", data
           assert isinstance(data.get("works"), list), data
-          assert data.get("source") == "OpenAlex public scholarly metadata API", data
+          assert data.get("source_status") in {"ready", "fallback", "temporarily_unavailable"}, data
           assert isinstance(data.get("warnings"), list) and data["warnings"], data
           assert data.get("source_status") in {"ready", "temporarily_unavailable"}, data
           assert all("title" in item and "study_type" in item and "url" in item for item in data["works"]), data
           if data["source_status"] == "temporarily_unavailable":
               print("PHYTOEVIDENCE DEGRADED MODE PASS")
-              print("OpenAlex outage is surfaced without breaking the research workspace.")
+              print("Both public indexes are unavailable; the research workspace remains usable.")
+          elif data["source_status"] == "fallback":
+              print("PHYTOEVIDENCE CROSSREF FALLBACK PASS")
+              print("Matched:", data.get("total_matched"), "| returned:", data.get("returned"))
           else:
-              print("PHYTOEVIDENCE LIVE PASS")
+              print("PHYTOEVIDENCE OPENALEX LIVE PASS")
               print("Matched:", data.get("total_matched"))
               print("Returned eligible records:", data.get("returned"))
               print("With abstracts:", data.get("coverage", {}).get("with_abstract"))
