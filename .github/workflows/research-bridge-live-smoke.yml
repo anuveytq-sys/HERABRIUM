@@ -1,4 +1,5 @@
 name: Research Bridge Live Smoke Test
+# Production contract covers all five Nexus domains and OpenAlex-to-Crossref fallback.
 
 on:
   push:
