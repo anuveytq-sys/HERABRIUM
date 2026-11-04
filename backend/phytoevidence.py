@@ -59,6 +59,85 @@ def _classify(title: str, abstract: str, work_type: str) -> str:
             return label
     return "Scholarly record — type not classified"
 
+def _crossref_fallback(query: str, body: "EvidenceQuery") -> dict[str, Any]:
+    """Use Crossref public metadata if OpenAlex is temporarily unreachable."""
+    filters = []
+    if body.year_from:
+        filters.append(f"from-pub-date:{body.year_from}")
+    if body.year_to:
+        filters.append(f"until-pub-date:{body.year_to}")
+    params = {
+        "query.bibliographic": query,
+        "rows": "30",
+        "select": "DOI,title,published,author,container-title,URL,type,abstract,license",
+    }
+    if filters:
+        params["filter"] = ",".join(filters)
+    payload = _get("https://api.crossref.org/works?" + urlencode(params))
+    message = payload.get("message") or {}
+    works = []
+    for item in message.get("items", []):
+        title = ((item.get("title") or [""])[0] or "").strip()
+        abstract = re.sub(r"<[^>]+>", " ", item.get("abstract") or "")
+        abstract = re.sub(r"\\s+", " ", abstract).strip()[:2200]
+        if not title or BLOCKED.search(title) or (abstract and BLOCKED.search(abstract)):
+            continue
+        date_parts = ((item.get("published") or {}).get("date-parts") or [[]])[0]
+        year = date_parts[0] if date_parts and isinstance(date_parts[0], int) else None
+        if body.year_from and year and year < body.year_from:
+            continue
+        if body.year_to and year and year > body.year_to:
+            continue
+        licenses = item.get("license") or []
+        open_access = bool(licenses)
+        if body.open_access_only and not open_access:
+            continue
+        authors = []
+        for author in (item.get("author") or [])[:5]:
+            name = " ".join(part for part in (author.get("given"), author.get("family")) if part).strip()
+            if name:
+                authors.append(name)
+        doi = item.get("DOI")
+        url = item.get("URL") or (f"https://doi.org/{doi}" if doi else "")
+        works.append({
+            "id": f"https://doi.org/{doi}" if doi else url or title,
+            "title": title,
+            "year": year,
+            "authors": authors,
+            "venue": ((item.get("container-title") or [""])[0] or ""),
+            "doi": doi,
+            "url": url,
+            "open_access": open_access,
+            "study_type": _classify(title, abstract, item.get("type") or ""),
+            "abstract": abstract,
+            "metadata_type": item.get("type") or "not supplied",
+            "source": "Crossref",
+            "source_url": url,
+            "limitations": "Crossref fallback metadata may be incomplete. A listed licence is not a guarantee of full-text access; verify the original record and licence.",
+        })
+    years = [work["year"] for work in works if isinstance(work["year"], int)]
+    return {
+        "query": query,
+        "source": "Crossref public scholarly metadata API (OpenAlex fallback)",
+        "source_status": "fallback",
+        "total_matched": message.get("total-results", len(works)),
+        "returned": len(works),
+        "works": works,
+        "coverage": {
+            "with_abstract": sum(bool(work["abstract"]) for work in works),
+            "open_access": sum(work["open_access"] for work in works),
+            "with_year": len(years),
+            "year_span": [min(years), max(years)] if years else None,
+            "classified_types": sorted({work["study_type"] for work in works}),
+        },
+        "warnings": [
+            "OpenAlex was temporarily unavailable; these candidates came from Crossref as a fallback.",
+            "Crossref metadata and abstracts may be incomplete. Verify each original publication and its licence.",
+            "Study-type labels are automated title/abstract classifications and require human review.",
+        ],
+        "review_required": True,
+    }
+
 @router.get("/health")
 def health() -> dict[str, str]:
     return {"service": "herabrium-phytoevidence", "status": "ready", "source": "OpenAlex"}
@@ -83,30 +162,31 @@ def search_evidence(body: EvidenceQuery) -> dict[str, Any]:
     try:
         payload = _get("https://api.openalex.org/works?" + urlencode(params))
     except RuntimeError:
-        # Keep the research workspace usable when an external index is
-        # temporarily unreachable. Nexus can still show its other four
-        # evidence domains and present this source as explicitly degraded.
-        return {
-            "query": query,
-            "source": "OpenAlex public scholarly metadata API",
-            "source_status": "temporarily_unavailable",
-            "total_matched": 0,
-            "returned": 0,
-            "works": [],
-            "coverage": {
-                "with_abstract": 0,
-                "open_access": 0,
-                "with_year": 0,
-                "year_span": None,
-                "classified_types": [],
-            },
-            "warnings": [
-                "OpenAlex could not be reached during this request. No publication records are being presented; retry the search later.",
-                "This temporary source outage does not affect the separate taxonomy, specimen, occurrence or conservation research domains.",
-                "Publication discovery results require review of the original scholarly records.",
-            ],
-            "review_required": True,
-        }
+        try:
+            return _crossref_fallback(query, body)
+        except RuntimeError:
+            # Keep Nexus usable even if both public scholarly indexes are down.
+            return {
+                "query": query,
+                "source": "OpenAlex / Crossref public scholarly metadata",
+                "source_status": "temporarily_unavailable",
+                "total_matched": 0,
+                "returned": 0,
+                "works": [],
+                "coverage": {
+                    "with_abstract": 0,
+                    "open_access": 0,
+                    "with_year": 0,
+                    "year_span": None,
+                    "classified_types": [],
+                },
+                "warnings": [
+                    "OpenAlex and Crossref could not be reached during this request. No publication records are being presented; retry later.",
+                    "This temporary source outage does not affect the separate taxonomy, specimen, occurrence or conservation research domains.",
+                    "Publication discovery results require review of the original scholarly records.",
+                ],
+                "review_required": True,
+            }
     works = []
     for item in payload.get("results", []):
         title = (item.get("title") or "").strip()
