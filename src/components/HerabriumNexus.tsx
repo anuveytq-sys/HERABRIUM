@@ -46,14 +46,20 @@ function LeafIcon(){return <CircleDot size={17}/>}
 export default function HerabriumNexus(){
  const [query,setQuery]=useState("");const [loading,setLoading]=useState(false);const [error,setError]=useState("");const [pack,setPack]=useState<EvidencePack|null>(null);const [selectedDomain,setSelectedDomain]=useState("biosphere");const [tab,setTab]=useState<"overview"|"timeline"|"literature">("overview");const [dossiers,setDossiers]=useState<SavedDossier[]>(loadDossiers);const [note,setNote]=useState("");const [openAccess,setOpenAccess]=useState(false);const [yearFrom,setYearFrom]=useState("");const [yearTo,setYearTo]=useState("");const [aiLoading,setAiLoading]=useState(false);const [aiError,setAiError]=useState("");
  const persist=(next:SavedDossier[])=>{setDossiers(next);localStorage.setItem(STORAGE,JSON.stringify(next))};
- async function runNexus(){const term=query.trim();if(term.length<2){setError("Enter a botanical species, place or biodiversity topic.");return}setLoading(true);setError("");setPack(null);setTab("overview");
+ async function runNexus(){const term=query.trim();if(term.length<2){setError("Enter a botanical species, place or biodiversity topic.");return}setLoading(true);setError("");setPack(null);setTab("overview");setAiLoading(false);setAiError("");
   const domainResults=await Promise.allSettled(DOMAINS.map(async d=>[d.id,await requestResearch(term,d.id)] as const));
   const domains:Record<string,ResearchBridgeResult|null>={};const warnings:string[]=[];
   for(let i=0;i<domainResults.length;i++){const r=domainResults[i];if(r.status==="fulfilled")domains[r.value[0]]=r.value[1];else{domains[DOMAINS[i].id]=null;warnings.push(DOMAINS[i].label+": "+(r.reason instanceof Error?r.reason.message:"Provider unavailable."));}}
   let literature:Literature[]=[];let literatureTotal=0;
   try{const response=await fetch("/api/v1/phytoevidence/search",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({query:term,year_from:yearFrom?Number(yearFrom):null,year_to:yearTo?Number(yearTo):null,open_access_only:openAccess})});const data=await response.json();if(!response.ok)throw new Error(data.detail||"Literature source unavailable.");literature=data.works||[];literatureTotal=data.total_matched||0;warnings.push(...(data.warnings||[]));}catch(e){warnings.push(e instanceof Error?e.message:"Literature search unavailable.");}
   const successful=Object.values(domains).filter(Boolean).length;if(successful===0){setError("Nexus could not reach the research bridge. Check the connection and retry.");setLoading(false);return}
-  const next:EvidencePack={query:term,created:new Date().toISOString(),domains,literature,literatureTotal,warnings};setPack(next);setLoading(false);
+  const next:EvidencePack={query:term,created:new Date().toISOString(),domains,literature,literatureTotal,warnings};setPack(next);
+  setAiLoading(true);
+  try {
+   const ai=await requestOpenRouterAnswer(term,"Nexus cross-domain botanical intelligence",next);
+   if(ai){setAiAnswerState(ai.answer);}
+  } catch(e){setAiError(e instanceof Error?e.message:"OpenRouter interpretation is temporarily unavailable.");}
+  finally{setAiLoading(false);setLoading(false);}
  }
  const allOccurrences=useMemo(()=>pack?Object.values(pack.domains).flatMap(r=>r?.occurrences||[]):[],[pack]);
  const yearCounts=useMemo(()=>{const counts=new Map<number,number>();allOccurrences.forEach(row=>{const y=row.year||(row.event_date?Number(row.event_date.slice(0,4)):NaN);if(Number.isFinite(y)&&y>1700&&y<2101)counts.set(y,(counts.get(y)||0)+1)});return [...counts.entries()].sort((a,b)=>a[0]-b[0]);},[allOccurrences]);
