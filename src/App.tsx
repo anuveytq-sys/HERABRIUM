@@ -40,54 +40,56 @@ export default function App() {
     let alive = true;
     const base = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "";
     if (base) fetch(base + "/health").then((r) => { if (alive) setApiOnline(r.ok); }).catch(() => { if (alive) setApiOnline(false); });
-    const ctx = gsap.context(() => {
-      // Use viewport-fixed cursors: panels often clip overflow, so cursors must not be
-      // appended inside cards where their travel can be hidden by overflow/stacking contexts.
-      gsap.utils.toArray<HTMLElement>(".reveal").forEach((element, index) => {
-        const cursors = Array.from({ length: 3 }, (_, cursorIndex) => {
+    const assemblyCursors: HTMLElement[] = [];
+    const revealElements = gsap.utils.toArray<HTMLElement>(".reveal");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const element = entry.target as HTMLElement;
+        observer.unobserve(element);
+        const rect = element.getBoundingClientRect();
+        const width = Math.max(rect.width, 100);
+        const height = Math.max(rect.height, 54);
+        const targets = [
+          { x: rect.left + Math.min(24, width * 0.12), y: rect.top + Math.min(24, height * 0.28) },
+          { x: rect.right - Math.min(24, width * 0.12), y: rect.top + Math.min(24, height * 0.28) },
+          { x: rect.left + width * 0.5, y: rect.bottom - Math.min(20, height * 0.18) }
+        ];
+        const origins = [
+          { x: -38, y: Math.max(90, rect.top - 55) },
+          { x: window.innerWidth + 38, y: Math.max(105, rect.top - 25) },
+          { x: Math.min(window.innerWidth - 30, Math.max(30, rect.left + width * 0.5)), y: window.innerHeight + 38 }
+        ];
+        const cursors = targets.map((_, cursorIndex) => {
           const cursor = document.createElement("span");
           cursor.className = "assembly-cursor";
-          cursor.setAttribute("aria-hidden", "true");
           cursor.dataset.cursor = String(cursorIndex + 1);
+          cursor.setAttribute("aria-hidden", "true");
           document.body.appendChild(cursor);
+          assemblyCursors.push(cursor);
+          gsap.set(cursor, { x: origins[cursorIndex].x, y: origins[cursorIndex].y, autoAlpha: 0, scale: 0.72, rotation: cursorIndex * 14 });
           return cursor;
         });
-        let played = false;
-        const assemble = () => {
-          if (played) return;
-          played = true;
-          const rect = element.getBoundingClientRect();
-          const width = Math.max(rect.width, 80);
-          const height = Math.max(rect.height, 45);
-          const ends = [
-            { x: rect.left + Math.min(28, width * 0.18), y: rect.top + Math.min(28, height * 0.3) },
-            { x: rect.right - Math.min(28, width * 0.18), y: rect.top + Math.min(28, height * 0.3) },
-            { x: rect.left + width * (index % 2 ? 0.72 : 0.5), y: rect.bottom - Math.min(22, height * 0.2) }
-          ];
-          const starts = [
-            { x: -30, y: Math.max(24, rect.top - 42) },
-            { x: window.innerWidth + 30, y: Math.max(48, rect.top - 18) },
-            { x: rect.left + width * 0.5, y: window.innerHeight + 30 }
-          ];
-          const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
-          timeline.fromTo(element, { y: 30, opacity: 0.35, filter: "brightness(.72)" }, { y: 0, opacity: 1, filter: "brightness(1)", duration: 0.72 }, 0);
-          cursors.forEach((cursor, cursorIndex) => {
-            timeline.fromTo(cursor,
-              { x: starts[cursorIndex].x, y: starts[cursorIndex].y, opacity: 0, scale: 0.55, rotation: cursorIndex * 18 },
-              { x: ends[cursorIndex].x, y: ends[cursorIndex].y, opacity: 1, scale: 1, rotation: 0, duration: 0.58 },
-              0.04 + cursorIndex * 0.1
-            );
-            timeline.to(cursor, { opacity: 0, scale: 0.25, duration: 0.28, ease: "power2.in" }, 0.72 + cursorIndex * 0.05);
-          });
-        };
-        ScrollTrigger.create({ trigger: element, start: "top 82%", once: true, onEnter: assemble });
+        const timeline = gsap.timeline();
+        timeline.to(element, { y: 0, duration: 0.65, ease: "power3.out" }, 0);
+        cursors.forEach((cursor, cursorIndex) => {
+          timeline.to(cursor, {
+            x: targets[cursorIndex].x, y: targets[cursorIndex].y,
+            autoAlpha: 1, scale: 1, rotation: 0,
+            duration: 0.9, ease: "power3.out"
+          }, cursorIndex * 0.14);
+          timeline.to(cursor, { autoAlpha: 0, scale: 0.35, duration: 0.42, ease: "power2.in" }, 1.22 + cursorIndex * 0.08);
+        });
       });
+    }, { root: null, rootMargin: "0px 0px -10% 0px", threshold: 0.04 });
+    revealElements.forEach((element) => observer.observe(element));
+    const ctx = gsap.context(() => {
       gsap.to(".scroll-progress span", { scaleX: 1, ease: "none", scrollTrigger: { trigger: document.body, start: "top top", end: "bottom bottom", scrub: 0.25 } });
       gsap.to(".hero-orbit", { rotation: 360, duration: 42, repeat: -1, ease: "none" });
       gsap.to(".hero-visual", { y: 115, scale: 0.84, opacity: 0.28, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.8 } });
       gsap.to(".hero-copy", { y: -75, opacity: 0.22, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.8 } });
     });
-    return () => { alive = false; ctx.revert(); };
+    return () => { alive = false; observer.disconnect(); assemblyCursors.forEach((cursor) => cursor.remove()); ctx.revert(); };
   }, []);
 
   const filteredPlants = useMemo(() => plants.filter((plant) => (plant.commonName + " " + plant.scientificName + " " + plant.family).toLowerCase().includes(query.toLowerCase())), [query]);
