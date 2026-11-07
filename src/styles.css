@@ -151,6 +151,4 @@
 .assembly-cursor[data-cursor="2"]:before,.assembly-cursor[data-cursor="2"]:after{background:#b8efff;box-shadow:0 0 9px 3px rgba(115,218,255,.45)}
 .assembly-cursor[data-cursor="3"]{border-color:rgba(202,163,255,.95);filter:drop-shadow(0 0 6px rgba(202,163,255,.8))}
 .assembly-cursor[data-cursor="3"]:before,.assembly-cursor[data-cursor="3"]:after{background:#e4d0ff;box-shadow:0 0 9px 3px rgba(202,163,255,.45)}
-@media(prefers-reduced-motion:reduce){
-  .assembly-cursor{display:none!important}
-}
+/* Keep the sci-fi assembly cursors visible on devices with reduced-motion enabled. */
