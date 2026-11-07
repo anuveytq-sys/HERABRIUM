@@ -71,7 +71,7 @@ export default function App() {
           return cursor;
         });
         const timeline = gsap.timeline();
-        timeline.to(element, { y: 0, duration: 0.65, ease: "power3.out" }, 0);
+        timeline.fromTo(element, { y: 18, scale: 0.992, filter: "brightness(.82)" }, { y: 0, scale: 1, filter: "brightness(1)", duration: 0.72, ease: "power3.out" }, 0);
         cursors.forEach((cursor, cursorIndex) => {
           timeline.to(cursor, {
             x: targets[cursorIndex].x, y: targets[cursorIndex].y,
