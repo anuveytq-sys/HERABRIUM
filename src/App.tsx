@@ -41,37 +41,46 @@ export default function App() {
     const base = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "";
     if (base) fetch(base + "/health").then((r) => { if (alive) setApiOnline(r.ok); }).catch(() => { if (alive) setApiOnline(false); });
     const ctx = gsap.context(() => {
+      // Use viewport-fixed cursors: panels often clip overflow, so cursors must not be
+      // appended inside cards where their travel can be hidden by overflow/stacking contexts.
       gsap.utils.toArray<HTMLElement>(".reveal").forEach((element, index) => {
-        // Decorative assembly cursors are isolated from the panel's content and controls.
-        if (getComputedStyle(element).position === "static") element.style.position = "relative";
-        element.classList.add("assembly-ready");
         const cursors = Array.from({ length: 3 }, (_, cursorIndex) => {
           const cursor = document.createElement("span");
           cursor.className = "assembly-cursor";
           cursor.setAttribute("aria-hidden", "true");
           cursor.dataset.cursor = String(cursorIndex + 1);
-          element.appendChild(cursor);
+          document.body.appendChild(cursor);
           return cursor;
         });
-        const entrance = gsap.timeline({
-          scrollTrigger: { trigger: element, start: "top 88%", once: true },
-          defaults: { ease: "power3.out" }
-        });
-        entrance.fromTo(element, { y: 34, opacity: 0 }, { y: 0, opacity: 1, duration: 0.85 }, 0);
-        cursors.forEach((cursor, cursorIndex) => {
-          const starts = [
-            { x: -42, y: -34 }, { x: 42, y: -28 }, { x: index % 2 ? -34 : 34, y: 38 }
-          ];
+        let played = false;
+        const assemble = () => {
+          if (played) return;
+          played = true;
+          const rect = element.getBoundingClientRect();
+          const width = Math.max(rect.width, 80);
+          const height = Math.max(rect.height, 45);
           const ends = [
-            { x: 12, y: 12 }, { x: -12, y: 12 }, { x: 0, y: -10 }
+            { x: rect.left + Math.min(28, width * 0.18), y: rect.top + Math.min(28, height * 0.3) },
+            { x: rect.right - Math.min(28, width * 0.18), y: rect.top + Math.min(28, height * 0.3) },
+            { x: rect.left + width * (index % 2 ? 0.72 : 0.5), y: rect.bottom - Math.min(22, height * 0.2) }
           ];
-          entrance.fromTo(cursor,
-            { x: starts[cursorIndex].x, y: starts[cursorIndex].y, opacity: 0, scale: 0.65, rotation: cursorIndex * 22 },
-            { x: ends[cursorIndex].x, y: ends[cursorIndex].y, opacity: 1, scale: 1, duration: 0.42, rotation: 0 },
-            0.12 + cursorIndex * 0.075
-          );
-          entrance.to(cursor, { opacity: 0, scale: 0.25, duration: 0.3, ease: "power2.in" }, 0.82 + cursorIndex * 0.05);
-        });
+          const starts = [
+            { x: -30, y: Math.max(24, rect.top - 42) },
+            { x: window.innerWidth + 30, y: Math.max(48, rect.top - 18) },
+            { x: rect.left + width * 0.5, y: window.innerHeight + 30 }
+          ];
+          const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
+          timeline.fromTo(element, { y: 30, opacity: 0.35, filter: "brightness(.72)" }, { y: 0, opacity: 1, filter: "brightness(1)", duration: 0.72 }, 0);
+          cursors.forEach((cursor, cursorIndex) => {
+            timeline.fromTo(cursor,
+              { x: starts[cursorIndex].x, y: starts[cursorIndex].y, opacity: 0, scale: 0.55, rotation: cursorIndex * 18 },
+              { x: ends[cursorIndex].x, y: ends[cursorIndex].y, opacity: 1, scale: 1, rotation: 0, duration: 0.58 },
+              0.04 + cursorIndex * 0.1
+            );
+            timeline.to(cursor, { opacity: 0, scale: 0.25, duration: 0.28, ease: "power2.in" }, 0.72 + cursorIndex * 0.05);
+          });
+        };
+        ScrollTrigger.create({ trigger: element, start: "top 82%", once: true, onEnter: assemble });
       });
       gsap.to(".scroll-progress span", { scaleX: 1, ease: "none", scrollTrigger: { trigger: document.body, start: "top top", end: "bottom bottom", scrub: 0.25 } });
       gsap.to(".hero-orbit", { rotation: 360, duration: 42, repeat: -1, ease: "none" });
